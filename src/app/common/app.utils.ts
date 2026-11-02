@@ -255,33 +255,33 @@ export class Util {
         return value1 === value2;
     }
 
-    /**
-     * Like operator
-     * @param strData String data
-     * @param strLikeExpresion Text to search
-     */
-    public like(strData: string, strLikeExpresion: string): boolean {
+    // /**
+    //  * Like operator
+    //  * @param strData String data
+    //  * @param strLikeExpresion Text to search
+    //  */
+    // public like(strData: string, strLikeExpresion: string): boolean {
 
-        if (this.isNull(strData) && this.isNull(strLikeExpresion)) {
-            return true;
-        }
+    //     if (this.isNull(strData) && this.isNull(strLikeExpresion)) {
+    //         return true;
+    //     }
 
-        if (this.isNull(strData) || this.isNull(strLikeExpresion)) {
-            return false;
-        }
+    //     if (this.isNull(strData) || this.isNull(strLikeExpresion)) {
+    //         return false;
+    //     }
 
-        if (strLikeExpresion.indexOf('%') < 0) {
-            return strData.toUpperCase().startsWith(strLikeExpresion.toUpperCase());
-        }
+    //     if (strLikeExpresion.indexOf('%') < 0) {
+    //         return strData.toUpperCase().startsWith(strLikeExpresion.toUpperCase());
+    //     }
 
-        let likeExpresion = strLikeExpresion.replace(new RegExp('[.]', 'g'), '\\.');
-        likeExpresion = likeExpresion.replace(new RegExp('[*]', 'g'), '\\*');
-        likeExpresion = likeExpresion.replace(new RegExp('[%]', 'g'), '.*');
-        likeExpresion = '^' + likeExpresion + '$';
+    //     let likeExpresion = strLikeExpresion.replace(new RegExp('[.]', 'g'), '\\.');
+    //     likeExpresion = likeExpresion.replace(new RegExp('[*]', 'g'), '\\*');
+    //     likeExpresion = likeExpresion.replace(new RegExp('[%]', 'g'), '.*');
+    //     likeExpresion = '^' + likeExpresion + '$';
 
-        const regExp = new RegExp(likeExpresion, 'i');
-        return regExp.test(strData);
-    }
+    //     const regExp = new RegExp(likeExpresion, 'i');
+    //     return regExp.test(strData);
+    // }
 
     /**
      * Returns true if date 1 is greater than date2
