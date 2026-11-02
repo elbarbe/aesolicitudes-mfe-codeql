@@ -2978,7 +2978,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
      * @param groupId Group id.
      */
     public isGroupVisible(groupId: string): boolean {
-        let isVisible = true;
+        let isVisible;
 
         switch (groupId) {
             case '5':
