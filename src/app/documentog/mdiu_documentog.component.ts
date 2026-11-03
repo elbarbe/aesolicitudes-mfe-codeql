@@ -11,8 +11,6 @@ import { ObsEstadoPIUuObsEstadoComponent } from '../obsestado/piu_obsestado.comp
 
 import { UserFunctions } from '../common/userFunctions';
 
-import { BHGestorAtomicUtil } from '../bhcallutils/bhgestoratomicutil';
-
 /**
  * « Implements MDIU MDIU_DocumentoG of DocumentoG »
  */
@@ -44,7 +42,6 @@ export class DocumentoGMDIUuDocumentoGComponent extends AbstractMDIU implements 
      */
     constructor(public override appGlobalInfo: AppGlobalInfo, public override util: Util,
                 public override changeDetectorRef: ChangeDetectorRef,
-                private gestorUtil: BHGestorAtomicUtil,
                 public langMng: LanguageMng, public stdFun: StandardFunctions,
                 public condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef);
@@ -56,7 +53,7 @@ export class DocumentoGMDIUuDocumentoGComponent extends AbstractMDIU implements 
         this.title = this.langMng.translateText('cls_DocumentoG_mdiu_MDIU_DocumentoG',
             'Detalles');
         // Create the details and assign the master detail container
-        this.master = new DocumentoGIIUuDocumentoGuMaestroComponent(appGlobalInfo, util, changeDetectorRef, langMng, stdFun, this.gestorUtil,
+        this.master = new DocumentoGIIUuDocumentoGuMaestroComponent(appGlobalInfo, util, changeDetectorRef, langMng, stdFun,
             condNavMng, usrFunc);
         this.master.masterDetailContainer = this;
         this.masterAbstract = this.master;

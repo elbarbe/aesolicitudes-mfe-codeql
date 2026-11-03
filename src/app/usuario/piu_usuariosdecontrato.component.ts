@@ -1,7 +1,7 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { AppGlobalInfo } from '../app.appglobalinfo';
 import { Util } from '../common/app.utils';
-import { DisplaySetItem, AccNavItem, ScenarioType, OpenScenarioType } from '../common/queryIUElements';
+import { DisplaySetItem, AccNavItem, ScenarioType } from '../common/queryIUElements';
 import { ModelConstants } from '../common/model.constants';
 import { AbstractPIU } from '../common/abstractPIU';
 import { Field } from '../common/baseIUElements';
@@ -221,9 +221,6 @@ export class UsuarioPIUuUsuariosDeContratoComponent extends AbstractPIU {
             this.langMng.translateText(
             'cls_Persona_svc_TELIMINAR',
             '¿Está seguro de que desea eliminar al usuario?'));
-        accItem.preconditionAttributes.push(
-            { agents: [],
-                attributes: ['drveseltitular', 'solicitud.drvtitularconbeneficios' ] });
         accItem.targetType  = ScenarioType.Delete;
         this.actions.push(accItem);
 
@@ -315,19 +312,6 @@ export class UsuarioPIUuUsuariosDeContratoComponent extends AbstractPIU {
         this.orderCriteria = 'OC_PorId';
     }
 
-    private checkPrecondicionInAdvanceTELIMINAR(rows: any[]): boolean {
-        for (const row of rows) {
-            // Solicitud.drvTitularConBeneficios = FALSE OR drvEsElTitular = FALSE  'drveseltitular', 'solicitud.drvtitularconbeneficios' 
-            if (!(this.util.valueEquals(this.util.getBool(this.getRowData(row, 'solicitud-drvtitularconbeneficios')), false) ||
-                this.util.valueEquals(this.util.getBool(this.getRowData(row, 'drveseltitular')), false))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-
     /**
      * Evaluate in advance the associated service preconditions to the action element
      * @param actionId Action element identification
@@ -335,10 +319,6 @@ export class UsuarioPIUuUsuariosDeContratoComponent extends AbstractPIU {
      */
     public override checkPreconditionInAdvanceForRows(actionId: number, rows: any[]): boolean {
         let isEnabled = true;
-
-        if (actionId === 3) {
-            isEnabled = this.checkPrecondicionInAdvanceTELIMINAR(rows);
-        }
 
         if (actionId === 4) {
             isEnabled = this.checkPrecondicionInAdvanceNum4(rows);

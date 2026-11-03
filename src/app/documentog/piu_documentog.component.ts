@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AppGlobalInfo } from '../app.appglobalinfo';
 import { Util } from '../common/app.utils';
-import { DisplaySetItem, AccNavItem, ScenarioType, OpenScenarioType } from '../common/queryIUElements';
+import { DisplaySetItem, AccNavItem, ScenarioType } from '../common/queryIUElements';
 import { ModelConstants } from '../common/model.constants';
 import { AbstractPIU } from '../common/abstractPIU';
 import { DefinedSelections } from '../common/definedSelection';
@@ -14,9 +14,6 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements PIU PIU_DocumentoG of DocumentoG »
  */
-import { DocumentoGServices } from './documentog.services';
-import { BHGestorAtomicUtil } from '../bhcallutils/bhgestoratomicutil';
-
 @Component({
     selector: 'imes-documentog-piu-documentog',
     templateUrl: './piu_documentog.component.html',
@@ -47,7 +44,6 @@ export class DocumentoGPIUuDocumentoGComponent extends AbstractPIU implements On
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public override langMng: LanguageMng, public stdFun: StandardFunctions,
-        private gestorUtil: BHGestorAtomicUtil,
         public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef, langMng, condNavMng);
         this.idXML = 'Clas_1434446200832109UIPobCl_1';
@@ -68,45 +64,6 @@ export class DocumentoGPIUuDocumentoGComponent extends AbstractPIU implements On
      */
     public ngOnInit(): void {
         this.myngOnInit();
-    }
-
-    public override doAction(actionId: number): void {
-
-        const action = this.getActionById(actionId);
-        if (action.targetClass === ModelConstants.Documentog.name &&
-            action.targetUI === ModelConstants.Documentog.siuuprevisualizarato) {
-            // Llamamos al servicio
-            const docSrv = new DocumentoGServices(this.appGlobalInfo, this.util);
-            this.setShowWait(true);
-            docSrv.previsualizarATO(this.getSelectedOids()[0]).then( ( respuesta: {
-                oatoken: string,
-                oaurldescarga: string,
-                oanumsolicitud: string
-            }) => {
-                if (respuesta && respuesta.oaurldescarga && respuesta.oatoken) {
-                    this.gestorUtil.descargarArchivo(respuesta.oatoken, respuesta.oaurldescarga, respuesta.oanumsolicitud).then( () => {
-                        this.setShowWait(false);
-                        this.changeDetectorRef.markForCheck();
-                    }).catch( (err: Error) => {
-                        this.setShowWait(false);
-                        this.util.addErrorMessage(err);
-                        this.changeDetectorRef.markForCheck();
-                    });
-                } else {
-                    this.setShowWait(false);
-                    this.util.addErrorMessage(this.gestorUtil.MSG_ERROR_GEN);
-                    this.changeDetectorRef.markForCheck();
-                }
-                this.changeDetectorRef.markForCheck();
-            }).catch( (err: Error) => {
-                this.setShowWait(false);
-                this.util.addErrorMessage(err);
-                this.changeDetectorRef.markForCheck();
-            });
-
-        } else {
-            super.doAction(actionId);
-        }
     }
 
     /**

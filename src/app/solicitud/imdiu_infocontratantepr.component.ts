@@ -65,7 +65,6 @@ export class SolicitudIMDIUuInfoContratantePRComponent extends AbstractMDIU impl
         if (this.d0Visible) {
             this.details.push(this.d0);
         }
-        this.loadDetailsOnDemand = false;
     }
 
     public ngOnInit(): void {

@@ -78,7 +78,6 @@ export class SolicitudMDIUuUsuariosINCLComponent extends AbstractMDIU implements
         if (this.d1Visible) {
             this.details.push(this.d1);
         }
-        this.loadDetailsOnDemand = false;
     }
 
     public ngOnInit(): void {

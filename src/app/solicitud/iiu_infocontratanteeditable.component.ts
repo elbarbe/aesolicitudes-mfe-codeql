@@ -1,7 +1,7 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { AppGlobalInfo } from '../app.appglobalinfo';
 import { Util } from '../common/app.utils';
-import { AccNavItem, ScenarioType, OpenScenarioType} from '../common/queryIUElements';
+import { AccNavItem, ScenarioType} from '../common/queryIUElements';
 import { ModelConstants } from '../common/model.constants';
 import { AbstractIIU } from '../common/abstractIIU';
 import { Field } from '../common/baseIUElements';
@@ -14,9 +14,6 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements IIU IIU_InfoContratanteEditable of Solicitud »
  */
-import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
-import { GestionCache } from '../common/gestionCache';
-
 export class SolicitudIIUuInfoContratanteEditableComponent extends AbstractIIU {
 
     /** Display Set elements */
@@ -38,8 +35,7 @@ export class SolicitudIIUuInfoContratanteEditableComponent extends AbstractIIU {
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
-        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431957012480960UIInst_18';
         this.className = ModelConstants.Solicitud.name;
@@ -54,16 +50,12 @@ export class SolicitudIIUuInfoContratanteEditableComponent extends AbstractIIU {
 
         // Associated service
         this.asrv = new SolicitudSIUuTINDICARCONTRATANTE2Component(appGlobalInfo,
-            util, changeDetectorRef, langMng, stdFun, condNavMng, usrFunc, bhServicesUtil, gestionCache);
+            util, changeDetectorRef, langMng, stdFun, condNavMng, usrFunc);
         this.asrv.queryContainer = this;
         this.associatedService = this.asrv;
 
         this.dseAeusolicitudesNumerousolicitud = new Field(this.langMng);
         this.cssClasses += 'cssDSNoShow';
-    }
-
-    public override processAssociatedServiceExecutionSuccess(): void {
-        this.util.addErrorMessage('Ejecución exitosa');
     }
 
     /**

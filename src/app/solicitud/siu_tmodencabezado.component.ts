@@ -377,11 +377,6 @@ export class SolicitudSIUuTMODENCABEZADOComponent extends AbstractServiceIU impl
                 varputhissolicitud.get('tipofactura.Codigo')));
             // ptSoloDiaUno.SetValue( v.Ae_solicitudes.plant.iniciocontdiauno )
             this.ptSoloDiaUno.setValue(this.util.getBool(varputhissolicitud.get('ae_solicitudes.plant.iniciocontdiauno')));
-            if (this.ptSoloDiaUno.value) {
-                this.ptuptFecha.addCSSClass('soloDiaUno');
-            } else {
-                this.ptuptFecha.removeCSSClass('soloDiaUno');
-            }
         }
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();

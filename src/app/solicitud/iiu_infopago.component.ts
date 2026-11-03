@@ -57,11 +57,6 @@ export class SolicitudIIUuInfoPagoComponent extends AbstractIIU {
         this.cssClasses += 'cssDSNoShow';
     }
 
-    public override processAssociatedServiceExecutionSuccess(): void {
-        this.util.addErrorMessage('Ejecución exitosa');
-        super.processAssociatedServiceExecutionSuccess();
-    }
-
     /**
      * Initialize the display set elements
      */

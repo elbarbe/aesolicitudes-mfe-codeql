@@ -365,13 +365,13 @@ export abstract class AbstractPIU extends AbstractQueryIU {
             case Field.dtDate:
                 col.styleClass = 'alignR';
                 // https://angular.io/api/common/DatePipe
-                col.mask = 'dd/MM/yyyy';
+                col.mask = 'shortDate';
                 col.type = 3;
                 col.width = 90;
                 break;
             case Field.dtDatetime:
                 col.styleClass = 'alignR';
-                col.mask = 'dd/MM/yyyy HH:mm:ss';
+                col.mask = 'short';
                 col.type = 3;
                 col.width = 120;
                 break;

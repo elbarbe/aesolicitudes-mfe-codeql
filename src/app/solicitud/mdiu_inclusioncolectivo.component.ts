@@ -17,9 +17,6 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements MDIU MDIU_InclusionColectivo of Solicitud »
  */
-import { GestionCache } from '../common/gestionCache';
-import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
-
 @Component({
     selector: 'imes-solicitud-mdiu-inclusioncolectivo',
     templateUrl: './mdiu_inclusioncolectivo.component.html',
@@ -61,8 +58,7 @@ export class SolicitudMDIUuInclusionColectivoComponent extends AbstractMDIU impl
     constructor(public override appGlobalInfo: AppGlobalInfo, public override util: Util,
                 public override changeDetectorRef: ChangeDetectorRef,
                 public langMng: LanguageMng, public stdFun: StandardFunctions,
-                public condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
-                private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
+                public condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef);
         this.idXML = 'Clas_1431957012480960UIMaDet_4';
         this.className = ModelConstants.Solicitud.name;
@@ -87,7 +83,7 @@ export class SolicitudMDIUuInclusionColectivoComponent extends AbstractMDIU impl
         this.d1Visible = this.appGlobalInfo.getLoggedUserInfo().isDetailVisible(this.idXML, 'Clas_1431957012480960UIMaDet_4Det_5',
             ['Admin', 'SuperAdmin', 'Asesor', 'AreaMedica', 'Afiliaciones', 'Gestor', 'MesaDeApoyo']);
         this.d1 = new SolicitudIIUuInfoTitularEditableComponent(appGlobalInfo, util, changeDetectorRef, langMng, stdFun,
-            condNavMng, usrFunc, bhServicesUtil, gestionCache);
+            condNavMng, usrFunc);
         this.d1.masterDetailContainer = this;
         if (this.d1Visible) {
             this.details.push(this.d1);

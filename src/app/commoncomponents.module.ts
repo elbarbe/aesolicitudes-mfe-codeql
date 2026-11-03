@@ -36,8 +36,6 @@ import { TICAGridComponent } from './common/tica/ticagrid.component';
 import { GenericSiuComponent } from './common/genericSiu.component';
 import { ChangePasswordComponent } from './common/changePassword.component';
 
-import { InputBlobSignatureComponent } from './common/fields/input.blob.signature'
-
 @NgModule({
     imports: [CommonModule, FormsModule, TableModule, DropdownModule, OverlayPanelModule,
         CalendarModule, MultiSelectModule, ListboxModule, RadioButtonModule, CheckboxModule, BlockUIModule, DialogModule, StepsModule,
@@ -48,7 +46,7 @@ import { InputBlobSignatureComponent } from './common/fields/input.blob.signatur
         TICAGridComponent, InputStringComponent, InputNumericComponent, InputDateComponent,
         InputDefinedSelectionComponent, InputRadioComponent, InputCheckComponent, InputBlobComponent,
         InputBlobImageComponent, ImesPDFViewerComponent, LenseComponent, LenseSearchComponent, PreloadComponent,
-        PreloadMultipleComponent, PreloadMultipleDropdownComponent, ErrorMessagesComponent, InputBlobSignatureComponent
+        PreloadMultipleComponent, PreloadMultipleDropdownComponent, ErrorMessagesComponent
     ],
     exports: [BreadCrumbMngComponent, WaitDialogComponent, ProgressBarComponent, ChangePasswordComponent,
         GridPreferencesComponent, ActionsNavigationsComponent, GridComponent, DetailsInRowGridComponent,
@@ -58,7 +56,6 @@ import { InputBlobSignatureComponent } from './common/fields/input.blob.signatur
         InputBlobImageComponent, ImesPDFViewerComponent, LenseComponent, LenseSearchComponent, PreloadComponent,
         PreloadMultipleComponent, PreloadMultipleDropdownComponent, ErrorMessagesComponent,
         FormsModule, TableModule, DropdownModule, CalendarModule, MultiSelectModule, ListboxModule, OverlayPanelModule,
-        RadioButtonModule, CheckboxModule, BlockUIModule, DialogModule, StepsModule, TriStateCheckboxModule, ConfirmDialogModule,
-       InputBlobSignatureComponent]
+        RadioButtonModule, CheckboxModule, BlockUIModule, DialogModule, StepsModule, TriStateCheckboxModule, ConfirmDialogModule]
 })
 export class CommonComponentsModule { }

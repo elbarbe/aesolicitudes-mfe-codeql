@@ -11,8 +11,6 @@ import { StandardFunctions } from '../common/standardFunctions';
 import { LanguageMng } from '../common/languageMng';
 import { ConditionalNavigationMng } from '../common/conditionalNavigationMng';
 import { UserFunctions } from '../common/userFunctions';
-import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
-import { GestionCache } from '../common/gestionCache';
 @Component({
     selector: 'imes-persona-siu-taddusuarioasol',
     templateUrl: './siu_taddusuarioasol.component.html',
@@ -62,8 +60,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
-        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431886233600805Ser_51UIServ_1';
         this.className = ModelConstants.Persona.name;
@@ -108,339 +105,6 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
 
     public ngOnInit(): void {
         this.myngOnInit();
-    }
-
-    private buscarPersonaenCORE(): void {
-    	// Si el usuario no puede ver los datos básicos de persona, no hacemos nada
-    	if (!this.appGlobalInfo.getLoggedUserInfo().puedeVerDatosPersona()) {
-    		return;
-    	}
-
-        // Comprobamos que tengamos el tipo y el numero
-        const tipo = this.ptupuagrTipoIdentificacion.getSelectedInstances();
-        if (tipo && tipo.length === 1 && this.ptupuatrNumIdentificacion.value) {
-            this.buscarPersonaenCOREAux(tipo[0].jsonOID);
-        }
-    }
-
-    private buscarPersonaenCOREAux(oidJSONTipoIdentificacion: string): void {
-
-        // Recuperamos los datos necesarios para tratar los datos
-        this.addQueryInstanceFromField(this.ptSolicitud, 'NumRadicado,drvPermiteRechazados,AE_SOLICITUDES.PlanT.EsVoluntario');
-        this.notifyCallToTheBackEnd();
-        this.cacheDependencyRules.searchAll().then(() => {
-            this.notifyAnswerFromToTheBackEnd();
-            const varputhissolicitud = this.getFirstInstanceFromCache(this.ptSolicitud);
-            const numSol = varputhissolicitud.get('NumRadicado');
-            this.notifyCallToTheBackEnd();
-            this.bhServicesUtil.buscarPersonaPorOidTipoIdent(oidJSONTipoIdentificacion, this.ptupuatrNumIdentificacion.value, numSol).then (( datosPersona: any) => {
-                this.notifyAnswerFromToTheBackEnd();
-                if (datosPersona?.basicData) {
-                    this.cargarPersonaNaturalDesdeCORE(datosPersona);
-                } else {
-                    this.util.addErrorMessage('La persona no existe');
-                    this.changeDetectorRef.markForCheck();
-                }
-            }).catch( (err: Error) => {
-                this.notifyAnswerFromToTheBackEnd();
-                this.setShowWait(false);
-                this.util.addErrorMessage(err);
-                this.changeDetectorRef.markForCheck();
-            });
-        });
-    }
-
-    private limpiarCampos(): void {
-        this.ptupuagrDepartamentoNacimiento.clean();
-        this.ptupuagrMunicipioNacimiento.clean();
-        this.ptupuagrMunicipioNacimiento.cleanPreload();
-        this.ptupuagrEstadoCivil.clean();
-        this.ptupuatrPrimerNombre.clean();
-        this.ptupuatrSegundoNombre.clean();
-        this.ptupuatrPrimerApellido.clean();
-        this.ptupuatrSegundoApellido.clean();
-        this.ptupuatrFechaNacimiento.clean();
-        this.ptupuatrGenero.clean();
-        this.ptupuatrIndicadorExtranjero.value = false;
-        this.executeDependecyRulesptupuatrindicadorextranjero('SetValue', true);
-        this.ptupuatrTelefonoFijo.clean();
-        this.ptupuatrTelefonoCelular.clean();
-        this.ptupuatrCorreoElectronico.clean();
-        this.ptupuagrDepartamento.clean();
-        this.ptupuagrMunicipio.clean();
-        this.ptupuagrMunicipio.cleanPreload();
-        this.ptupuatrDireccionCompleta.clean();
-        this.ptupuatrRural.value = false;
-        this.ptupuCodigo.clean();
-        this.executeDependecyRulesptupucodigo('SetValue', true);
-        this.ptupuTieneEPSSanitas.value = false;
-        this.ptupuRechazadoAfiliacion.clean();
-        this.ptupuagrPais.clean();
-        this.ptReplicarDireccion.value = false;
-        this.ptDireccionesXClass.clean();
-        this.ptDireccionesXClass.options = [];
-        this.ptEstadoPersona.clean();
-    }
-
-    private cargarPersonaNaturalDesdeCORE(datosPersona: any): void {
-
-        // Lista de promesas a las que tenemos que esperar para terminar
-        this.setShowWait(true);
-        this.limpiarCampos();
-
-        const varputhissolicitud = this.getFirstInstanceFromCache(this.ptSolicitud);
-        const permiteRechazados = varputhissolicitud.get('drvPermiteRechazados');
-        const planVoluntario = varputhissolicitud.get('AE_SOLICITUDES.PlanT.EsVoluntario');
-        const numSol = varputhissolicitud.get('NumRadicado');
-
-
-        // Codigo del CORE
-        this.ptupuCodigo.value = datosPersona.basicData.id;
-        this.executeDependecyRulesptupucodigo('SetValue', true);
-       
-        // Rechazado Afiliacion
-        this.ptupuRechazadoAfiliacion.value = datosPersona?.rechazadoAfiliacion;
-
-        // Tiene EPS Sanitas
-        this.gestionCache.getCodigoLegalTipoIdentificacion(this.ptupuagrTipoIdentificacion.getSelectedInstances()[0].jsonOID).then ((codLegal: string) => {
-            this.notifyCallToTheBackEnd();
-            this.bhServicesUtil.tieneEPSSanitas(codLegal, this.ptupuatrNumIdentificacion.value, numSol).then ( (tieneEPS: boolean) => {
-                this.ptupuTieneEPSSanitas.setValue(tieneEPS);
-                this.changeDetectorRef.markForCheck();
-                this.notifyAnswerFromToTheBackEnd();
-            }).catch( (err: Error) => {
-                this.notifyAnswerFromToTheBackEnd();
-                this.changeDetectorRef.markForCheck();
-                this.util.addErrorMessage(err);
-            });
-    
-        }).catch( (err: Error) => {
-            this.util.addErrorMessage(err);
-        });
-
-        // Nombre
-        this.ptupuatrPrimerNombre.value = datosPersona?.basicData?.name?.name?.firstName;
-        this.ptupuatrSegundoNombre.value = datosPersona?.basicData?.name?.name?.secondName;
-        this.ptupuatrPrimerApellido.value = datosPersona?.basicData?.name?.name?.firstFamily;
-        this.ptupuatrSegundoApellido.value = datosPersona?.basicData?.name?.name?.secondFamily;
-        this.ptupuatrFechaNacimiento.value = this.util.getDate(datosPersona?.basicData?.birthDate);
-        this.ptupuatrGenero.value = datosPersona?.basicData?.gender;
-
-        if (datosPersona?.basicData?.foreign) {
-            this.ptupuatrIndicadorExtranjero.value = true;
-        } else {
-            this.ptupuatrIndicadorExtranjero.value = false;
-        }
-        this.executeDependecyRulesptupuatrindicadorextranjero('SetValue', true);
-
-        this.ptupuatrTelefonoFijo.value = BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom);
-        this.ptupuatrTelefonoCelular.value = BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom);
-        this.ptupuatrCorreoElectronico.value = BHServicesUtil.getCorreoElectronico(datosPersona?.contact?.telecom);
-
-        this.ptupuagrEstadoCivil.setValue( datosPersona?.basicData?.maritalStatus?.code ? 
-            this.util.oidBuilder.buildOidEstadoCivil(datosPersona?.basicData?.maritalStatus?.code) : null);
-
-        // Ciudad de nacimiento
-        if (datosPersona?.basicData?.extension && datosPersona?.basicData?.extension.length > 0) {
-            const valueAddress = datosPersona?.basicData?.extension[0].valueAddress;
-            if (valueAddress) {
-                // Tenemos los codigos legales de departamento y municipio
-                const codLegalDep = valueAddress?.state?.code;
-                const codLegalMun = valueAddress?.city?.code;
-                if (codLegalDep) {
-                    this.notifyCallToTheBackEnd();
-                    this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then( (oidDep: string) => {
-                        this.notifyAnswerFromToTheBackEnd();
-                        // Asignamos el valor el argumento y precargamos los municipios
-                        this.ptupuagrDepartamentoNacimiento.setValue(JSON.parse(oidDep));
-                        this.loadPreloadptupuagrmunicipionacimiento();
-                        if (codLegalMun) {
-                            // Buscamos el municipio por codigo legal
-                            this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then ((oidMun: string) => {
-                                this.notifyAnswerFromToTheBackEnd();
-                                this.ptupuagrMunicipioNacimiento.setValue(JSON.parse(oidMun));
-                            }).catch( (err: Error) => {
-                                this.notifyAnswerFromToTheBackEnd();
-                                this.util.addErrorMessage(err);
-                            });
-                        }
-                    });
-                }
-            }
-        }
-
-        // Direccion residencial
-        const direccionResidencia = BHServicesUtil.getElemento(datosPersona?.contact?.address, 'use', 'RESIDENCIAL');
-        if (direccionResidencia) {
-            this.ptupuatrDireccionCompleta.value = direccionResidencia.text;
-            this.ptupuatrRural.value = false;
-            // Tenemos los codigos legales de departamento y municipio
-            const codLegalDep = direccionResidencia?.state?.code;
-            const codLegalMun = direccionResidencia.city?.code;
-            const codPais = direccionResidencia.country?.code;
-
-            if (codLegalDep) {
-                this.notifyCallToTheBackEnd();
-                this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then( (oidDep: string) => {
-                    this.notifyAnswerFromToTheBackEnd();
-                    // Asignamos el valor el argumento y precargamos los municipios
-                    this.ptupuagrDepartamento.setValue(JSON.parse(oidDep));
-                    this.loadPreloadptupuagrmunicipio();
-                    if (codLegalMun) {
-                        // Buscamos el municipio por codigo legal
-                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then ((oidMun: string) => {
-                            this.notifyAnswerFromToTheBackEnd();
-                            this.ptupuagrMunicipio.setValue(JSON.parse(oidMun));
-                        }).catch( (err: Error) => {
-                            this.notifyAnswerFromToTheBackEnd();
-                            this.util.addErrorMessage(err);
-                        });
-                    }
-                });
-            }
-            // Pais
-            if (codPais) {
-                this.notifyCallToTheBackEnd();
-                this.gestionCache.existePais(codPais).then((existePais: boolean) => {
-                    this.notifyAnswerFromToTheBackEnd();
-                    // Asignamos el valor el argumento
-                    if (existePais) {
-                        this.ptupuagrPais.setValue(this.util.oidBuilder.buildOidPais(codPais));
-                    }
-                }).catch( (err: Error) => {
-                    this.notifyAnswerFromToTheBackEnd();
-                    this.util.addErrorMessage(err);
-                });
-            }
-        }
-
-
-        // Estado de la persona
-        if (datosPersona.estadoPersona) {
-            this.ptEstadoPersona.setValue( this.util.oidBuilder.buildOidEstadoPersona(datosPersona.estadoPersona));
-        }
-
-        // Cargamos todas las direcciones recibidas en el combo
-        // Si el usuario no puede ver los datos básicos de persona, no hacemos nada
-        if (this.appGlobalInfo.getLoggedUserInfo().userCache?.modDBasicosPersona && datosPersona?.contact?.address) {
-            let i = 1;
-            for (const dir of datosPersona.contact.address) {
-                const datoDireccion = {
-                    idUnico: i,
-                    address: dir,
-                    telefonoFijo: BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom),
-                    telefonoCelular: BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom)
-                }
-                this.ptDireccionesXClass.options.push({key: datoDireccion, value: dir.text})
-                i++;
-            }
-        }
-
-
-        // Si la persona existe y el plan de la solicitud es voluntario, buscamos los contratos existentes
-        // Planes Voluntarios - Req. 5: Validación de afiliado - Referencia: HU-AEEPS-04
-        if (planVoluntario) {
-            this.notifyCallToTheBackEnd();
-            this.bhServicesUtil.consultarBeneficiario( 
-                BHServicesUtil.getValorElementoPorClave(datosPersona.basicData.identifier, 'type', 'TIPO_IDENTIFICACION', 'value'),
-                BHServicesUtil.getValorElementoPorClave(datosPersona.basicData.identifier, 'type', 'NUMERO_IDENTIFICACION', 'value'),
-                numSol).then ((contratos: string[]) => {
-                // Recorremos los contratos encontrados
-                this.notifyAnswerFromToTheBackEnd();
-                if (contratos) {
-                    // Recorremos los contratos 
-                    let mensaje = '';
-
-                    mensaje += this.ptupuatrPrimerNombre.value ? this.ptupuatrPrimerNombre.value : '';
-                    mensaje += this.ptupuatrSegundoNombre.value ? " " + this.ptupuatrSegundoNombre.value : '';
-                    mensaje += this.ptupuatrPrimerApellido.value ? " " + this.ptupuatrPrimerApellido.value : '';
-                    mensaje += this.ptupuatrSegundoApellido.value ? " " + this.ptupuatrSegundoApellido.value : '';
-              
-                    contratos.unshift(mensaje);
-                    this.util.addErrorMessageList( contratos );
-                }
-            }).catch( (err: Error) => {
-                this.notifyAnswerFromToTheBackEnd();
-                this.util.addErrorMessage(err);
-            });
-        }        
-    }
-
-    private asignarDireccionSeleccionada(): void {
-        // Asignamos la dirección seleccionada en el combo
-        if (!this.ptDireccionesXClass.value) {
-            return;
-        }
-
-        const dirSel = this.ptDireccionesXClass.value;
-        this.ptupuatrDireccionCompleta.value = dirSel.address.text;
-        this.ptupuatrTelefonoFijo.value = dirSel.telefonoFijo;
-        this.ptupuatrTelefonoCelular.value = dirSel.telefonoCelular;
-        const codLegalDep = dirSel.address.state?.code;
-        const codLegalMun = dirSel.address.city?.code;
-        const codPais = dirSel.address.country?.code;
-
-        if (codLegalDep) {
-            this.setShowWait(true);
-            this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then( (oidDep: string) => {
-                this.setShowWait(false);
-                if (oidDep) {
-                    // Si no es el mismo departamento
-                    const depSeleccionado = this.ptupuagrDepartamento.getSelectedInstances() ? this.ptupuagrDepartamento.getSelectedInstances()[0] : undefined;
-                    if (depSeleccionado?.jsonOID != oidDep) {
-                        // Asignamos el valor el argumento y precargamos los municipios
-                        this.ptupuagrDepartamento.setValue(JSON.parse(oidDep));
-                        this.loadPreloadptupuagrmunicipio();
-                    } else {
-
-                    }
-                    if (codLegalMun) {
-                        const munSeleccionado = this.ptupuagrMunicipio.getSelectedInstances() ? this.ptupuagrMunicipio.getSelectedInstances()[0] : undefined;
-                        // Buscamos el municipio por codigo legal
-                        this.setShowWait(true);
-                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then ((oidMun: string) => {
-                            this.setShowWait(false);
-                            if (munSeleccionado?.jsonOID != oidMun) {                                
-                                this.ptupuagrMunicipio.setValue(JSON.parse(oidMun));
-                            }
-                        }).catch( (err: Error) => {
-                            this.setShowWait(false);
-                            this.util.addErrorMessage(err);
-                        });
-                        
-                    } else {
-                        this.ptupuagrMunicipio.clean();
-                    }
-
-                }
-            }).catch( (err: Error) => {
-                this.setShowWait(false);
-                this.util.addErrorMessage(err);
-            });
-        } else {
-            this.ptupuagrDepartamento.clean();
-            this.loadPreloadptupuagrmunicipio();
-        }
-         // Pais
-        if (codPais) {
-            this.gestionCache.existePais(codPais).then((existePais: boolean) => {
-                // Asignamos el valor el argumento
-                this.setShowWait(false);
-                if (existePais) {
-                    this.ptupuagrPais.setValue(this.util.oidBuilder.buildOidPais(codPais));
-                }
-            }).catch( (err: Error) => {
-                this.setShowWait(false);
-                this.util.addErrorMessage(err);
-            })
-        } else {
-            this.ptupuagrPais.clean();
-        }
-    }    
-
-    public override saveChanges(): void {
-        this.ptDireccionesXClass.clean();
-        super.saveChanges();
     }
 
     /**
@@ -712,7 +376,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
             'Direcciones');
         this.ptDireccionesXClass.mandatory = false;
         this.ptDireccionesXClass.dataType = Field.dtString;
-        this.ptDireccionesXClass.options = [];
+        this.ptDireccionesXClass.options = DefinedSelections.DS_GENERO;
         this.ptDireccionesXClass.maxLength = 1;
         this.ptDireccionesXClass.assignCSS();
         this.fields.push(this.ptDireccionesXClass);
@@ -1141,7 +805,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
                 this.appGlobalInfo.getLoggedUserInfo().oid);
         }
         // v <> NULL AND v.nombrecorto <> "MS" AND (AGENT_Asesor = NULL OR agent_asesor.moddbasicospersona = TRUE)
-        if (varptupuagrtipoidentificacion && !this.util.isNull(varptupuagrtipoidentificacion) &&
+        if (varptupuagrtipoidentificacion && varAgentAsesor && !this.util.isNull(varptupuagrtipoidentificacion) &&
             !this.util.valueEquals(varptupuagrtipoidentificacion.get('nombrecorto'), 'MS') && (this.util.isNull(varAgentAsesor) ||
             this.util.valueEquals(this.util.getBool(varAgentAsesor.get('moddbasicospersona')), true))) {
             // pt_p_atrPrimerNombre.SetActive( TRUE )
@@ -1172,7 +836,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
         }
         // Rule 1
         if ('SetValue' === event && !internal) {
-            this.buscarPersonaenCORE();
+            this.executeDependecyRules1ptupuatrNumIdentificacion();
         }
         this.executePendingDependencyRules();
     }
@@ -1970,8 +1634,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
         // v <> NULL
         if (!this.util.isNull(this.ptDireccionesXClass.value)) {
             // pt_p_atrDireccionCompleta.SetValue( NULL )
-            // this.ptupuatrDireccionCompleta.setValue(null);
-            this.asignarDireccionSeleccionada();
+            this.ptupuatrDireccionCompleta.setValue(null);
         }
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();
@@ -2138,7 +1801,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
      * @param groupId Group id.
      */
     public isGroupVisible(groupId: string): boolean {
-        let isVisible = true;
+        let isVisible;
 
         if (groupId === '0') {
             isVisible = this.ptupuagrTipoIdentificacion.visible ||

@@ -14,8 +14,6 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements global SIU SIU_OGENERARSOLICITUD2 »
  */
-import { ErrorInformation } from '../common/answerRequestInformation';
-
 @Component({
     selector: 'imes-gs-siu-ogenerarsolicitud2',
     templateUrl: './siu_ogenerarsolicitud2.component.html',
@@ -44,7 +42,8 @@ export class GSSIUuOGENERARSOLICITUD2Component extends AbstractServiceIU impleme
         this.idXML = 'IGl_1462185885696764UIServ_1';
         this.className = ModelConstants.Globalservices.name;
         this.iuName = ModelConstants.Globalservices.siuuogenerarsolicitud2;
-        this.setUserVisibility(true);
+        this.setUserVisibility(this.appGlobalInfo.getLoggedUserInfo().isIUVisible(this.idXML, ['Admin', 'SuperAdmin', 'Asesor',
+            'Afiliaciones']));
         this.serviceName = 'OGENERARSOLICITUD2';
         this.title = this.langMng.translateText('gs_OGENERARSOLICITUD2',
             'Replicar solicitud');
@@ -198,41 +197,13 @@ export class GSSIUuOGENERARSOLICITUD2Component extends AbstractServiceIU impleme
         }
     }
 
-    public override executeService(request: any): void {
-        this.util.callHttpPost(`${this.appGlobalInfo.APPCONSTANTS.BASE_URL}/api/${this.className}Api/${this.serviceName}`,
-            request).then(
-                (response: any) => {
-                    this.setShowWait(false);
-                    if (response.resultCode !== '000' && response.resultCode !== '') {
-                        this.util.addErrorMessage(response.resultDescription);
-                        this.processCancel();
-                    } else {
-                        this.setShowWait(false);
-                        this.processOutboundArguments(request, response);
-                    }
-                    this.changeDetectorRef.markForCheck();
-                }, (errResponse: ErrorInformation) => {
-                    this.util.addErrorMessage(errResponse);
-                    this.processCancel();
-                this.changeDetectorRef.markForCheck();
-                });
-
-    }
-
     /**
      * Process the service answer to show the outbound argument scenario
      */
     public override processOutboundArguments(request: any, response: any): boolean {
-        // Quitamos el elemento de la cabeza de la pila del contexto
-        let exchInfo: ExchangeInfo = this.getContext()?.exchangeInfo as ExchangeInfo;
-        let comeback = exchInfo.comeBackContext; 
-        if (exchInfo.comeBackContext?.exchangeInfo?.comeBackContext) {
-            comeback = exchInfo.comeBackContext.exchangeInfo.comeBackContext;
-        }
-        
         this.util.navigateOutboundArgumentsScenario(this.className, 'siu_ogenerarsolicitud2_out',
             this.context.exchangeInfo ? this.context.exchangeInfo.previous : null,
-            comeback, request, response);
+            this.context.exchangeInfo ? this.context.exchangeInfo.comeBackContext : null, request, response);
         return true;
     }
 }

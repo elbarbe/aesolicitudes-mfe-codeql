@@ -3,7 +3,7 @@
     <div class="input-group">
         <input type="text" [(ngModel)]="field.text" class="form-control"
             [ngClass]="{ 'form-control-static' : !field.enabled }" [disabled]="!field.enabled"
-            [required]="field.mandatory" (keyup)="onKeyUp($event)" (keydown)="onKeyDown($event)" autocomplete="off" />
+            [required]="field.mandatory" (keydown)="onKeyDown($event)" autocomplete="off" />
             <ng-container *ngIf="resultListVisible()">
                 <p-overlayPanel #overlayPanel styleClass="lenseSearchListPanel">
                     <div class="dropdown open lenseSearchResultList" >

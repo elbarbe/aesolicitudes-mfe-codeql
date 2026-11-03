@@ -1,119 +1,23 @@
 <waitDialog [showWait]="showWait"></waitDialog> 
 <form novalidate>
     <ng-container *ngIf="visible">
-        <h3 class="title">{{title}}</h3>
+        <h3 class="title">{{getCompleteTitle()}}</h3>
         <div class="iiuRegion" [ngClass]="cssClasses">
-            <!-- <imes-actionsnavigations [queryIU]="this"></imes-actionsnavigations> -->
+            <imes-actionsnavigations [queryIU]="this"></imes-actionsnavigations>
             <!-- Display Set elements -->
             <div class="card displaySet">
                 <div class="card-header">{{title}}</div>
                 <div class="card-body">
-                    <imes-input-string style="margin-left: 74px;display: block;"
-                        [field]="dseUsuariodrvNombreCompleto"
-                        *ngIf="dseUsuariodrvNombreCompleto.visible"></imes-input-string>
-
-
-                    <div class="examenMedico ">
-
-                        <div class="exMeBtnMarcarDiligenciado" *ngIf="!soloLectura()">
-                            <button type="button" class="btnOk btn" title="Marcar completado" 
-                                (click)="procesarMarcarDiligenciado()">Marcar completado</button>
-                        </div>
-
-                        <div class="exMeBtnGrabar" *ngIf="!soloLectura()">
-
-                            <button type="button" class="btnOk btn " title="Grabar"
-                                (click)="guardar()">Grabar</button>
-                        </div>
-
-                        <div class="panelExamenMedico">
-
-                            <ng-container *ngFor="let seccion of secciones">
-
-                                <div class="exMeCabSeccion">
-                                    <div class="exMeCabSeccionTexto">
-                                        <label>{{seccion.nombre}}</label>
-                                    </div>
-                                    <div class="exMePreguntas">
-
-                                        <ng-container *ngFor="let pre of seccion.preguntas">
-
-                                            <div class="exPregunta">
-                                                <!-- Texto pregunta -->
-                                                <div class="exMePreTexto">
-                                                    <label>{{pre.textoPregunta}}</label>
-                                                </div>
-                                                <!-- Respuesta Si/No -->
-                                                <div *ngIf="respuestaSiNoVisible(pre)" class="exMePreRespSiNo">
-                                                    <span class="inputRadio">
-                                                        <p-radioButton [name]="pre.identificador" value="Sí" label="Sí"
-                                                            [(ngModel)]="pre.respuestaSiNo"
-                                                            [disabled]="soloLectura() || respuestaSiNoDisabled(pre)"
-                                                            (ngModelChange)="onRespuestaSiNoChange(pre)"></p-radioButton>
-                                                    </span>
-                                                    <span class="inputRadio">
-                                                        <p-radioButton [name]="pre.identificador" value="No" label="No"
-                                                            [(ngModel)]="pre.respuestaSiNo"
-                                                            [disabled]="soloLectura() || respuestaSiNoDisabled(pre)"
-                                                            (ngModelChange)="onRespuestaSiNoChange(pre)"></p-radioButton>
-                                                    </span>
-                                                </div>
-
-                                                <!-- Respuesta Numero-->
-                                                <div *ngIf="pre.esNumero" class="exMePreRespNum">
-                                                    <input #inputNumeric [name]="'num' + pre.identificador" type="text"
-                                                        class="form-control" [(ngModel)]="pre.respuestaNum"
-                                                        [disabled]="soloLectura() || editorDisabled(pre)" autocomplete="off"
-                                                        />
-                                                </div>
-
-                                                <!-- Respuesta Combo-->
-                                                <div *ngIf="pre.mostrarCombo" class="exMePreRespCombo">
-                                                    <select [(ngModel)]="pre.valorSeleccionadoCombo" [name]="'combo' + pre.identificador"
-                                                        [disabled]="soloLectura() || editorDisabled(pre)" autocomplete="off">
-                                                        <option class="option" *ngFor="let option of pre.opciones"
-                                                            [ngValue]="option.valor">{{option.valor}}</option>
-                                                    </select>
-                                                </div>
-
-                                                <!-- Respuestas selección múltiple -->
-
-                                                <div *ngIf="pre.mostrarLista" class="exMePreRespMultiple">
-                                                    <ng-container *ngFor="let opcion of pre.opciones">
-                                                        <div class="exMeOpcionRespMultiple">
-                                                            <label>{{opcion.valor}}</label>
-                                                            <p-checkbox [(ngModel)]="opcion.seleccionado" 
-                                                            [disabled]="soloLectura() || editorDisabled(pre)"
-                                                            [binary]="true" ></p-checkbox>                                                        
-                                                        </div>
-                                                    </ng-container>
-                                                </div>
-
-                                                <!-- Respuesta Observaciones-->
-                                                <div *ngIf="pre.obsOblig && !pre.esNumero" class="exMePreRespObs">
-                                                    <textarea [name]="'obs' + pre.identificador" class="form-control" [(ngModel)]="pre.respuestaObs"
-                                                        (keyup)="pre.respuestaObs = pre.respuestaObs.toUpperCase()"
-                                                        [disabled]="soloLectura() || editorDisabled(pre)"
-                                                        autocomplete="off"></textarea>
-                                                </div>
-
-                                            </div>
-                                        </ng-container>
-                                    </div>
-
-                                </div>
-
-                            </ng-container>
-
-                        </div>
-
-                    </div>
+                    <imes-input-string [field]="dseUsuariodrvNombreCompleto" *ngIf="dseUsuariodrvNombreCompleto.visible"></imes-input-string>
+                    <imes-input-check [field]="dseYaDiligenciado" *ngIf="dseYaDiligenciado.visible"></imes-input-check>
                 </div>
             </div>
-            <div class="col-12 iiuButtons">
-                <button type="button" class="btnCancel btn btn-danger"
-                    (click)="processCancel()">{{langMng.translateText('app_CLOSE', '')}}</button>
+            <div *ngIf="showInstanceLog" class="iiuLogNavigation">
+                <a (click)="onNavigateLoginstance()">{{langMng.translateText('app_INSTANCELOG', 'Log Instance')}}</a>
             </div>
+        </div>
+        <div class="col-12 iiuButtons">
+            <button type="button" class="btnCancel btn btn-danger" (click)="processCancel()">{{langMng.translateText('app_CLOSE', '')}}</button>
         </div>
     </ng-container>
 </form>

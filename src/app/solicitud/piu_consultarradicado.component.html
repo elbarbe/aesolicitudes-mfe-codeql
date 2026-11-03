@@ -22,8 +22,8 @@
                             <div class="filterVariables">
                                 <imes-input-date [field]="f0.vfDesde" *ngIf="f0.vfDesde.visible"></imes-input-date>
                                 <imes-input-date [field]="f0.vfHasta" *ngIf="f0.vfHasta.visible"></imes-input-date>
-                            <imes-preload [field]="f0.vouTipoDoc" *ngIf="f0.vouTipoDoc.visible" (selected)="f0.buscarPersona()"></imes-preload>
-                                <imes-input-string [field]="f0.vuNumDoc" *ngIf="f0.vuNumDoc.visible" (valueChanged)="f0.buscarPersona()"></imes-input-string>
+                            <imes-preload [field]="f0.vouTipoDoc" *ngIf="f0.vouTipoDoc.visible"></imes-preload>
+                                <imes-input-string [field]="f0.vuNumDoc" *ngIf="f0.vuNumDoc.visible"></imes-input-string>
                             <imes-lensesearch [field]="f0.voPersona" *ngIf="f0.voPersona.visible"
                                 (selected)="f0.processvopersonaSelected($event)" (cleared)="f0.cleanvopersona()"
                                 (keypressLenseSearch)="f0.onKeypressLenseSearch('onvopersonaChange')"

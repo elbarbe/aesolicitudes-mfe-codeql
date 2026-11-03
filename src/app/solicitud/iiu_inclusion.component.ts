@@ -1,7 +1,7 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { AppGlobalInfo } from '../app.appglobalinfo';
 import { Util } from '../common/app.utils';
-import { AccNavItem, ScenarioType, OpenScenarioType} from '../common/queryIUElements';
+import { AccNavItem, ScenarioType} from '../common/queryIUElements';
 import { ModelConstants } from '../common/model.constants';
 import { AbstractIIU } from '../common/abstractIIU';
 import { Field, FieldBlob, FieldDefinedSelection } from '../common/baseIUElements';
@@ -14,8 +14,6 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements IIU IIU_Inclusion of Solicitud »
  */
-import { LogicError } from '../common/answerRequestInformation';
-
 export class SolicitudIIUuInclusionComponent extends AbstractIIU {
 
     /** Display Set elements */
@@ -67,41 +65,6 @@ export class SolicitudIIUuInclusionComponent extends AbstractIIU {
         this.cssClasses += 'cssNavPrimero';
     }
 
-    public override doAction(actionId: number): void {
-
-        const action = this.getActionById(actionId);
-        if (action && action.targetClass === ModelConstants.Solicitud.name &&
-            action.targetUI === ModelConstants.Solicitud.siuuenviarsmsinfopago &&
-            this.getSelectedOids().length === 1) {
-            // Lanzamos el servicio de info pago y generamos el PDF
-            this.setShowWait(true);
-            // Lanzamos el servicio ignorando la respuesta
-            this.util.executeNoShowService( ModelConstants.Solicitud.name,
-                action.noShowServiceName,
-                this.getSelectedOids()[0],
-                action.noShowArgumentName);
-
-            const request: {ptsolicitud_oid: any, pttipo: number} = { ptsolicitud_oid: this.getSelectedOids()[0], pttipo: 0};
-            const url = this.appGlobalInfo.APPCONSTANTS.BASE_URL + '/api/GlobalServicesApi/OGETREPORTE';
-            this.util.callHttpPost(url, request, false).then((response: any) => {
-                this.setShowWait(false);
-                const posibleError = new LogicError(response);
-                if (posibleError.IsError()) {
-                    this.util.addErrorMessage(posibleError.message);
-                } else  if (response.oaarchivo && response.oanombrearchivo) {
-                    this.util.openInNewWindow(response.oaarchivo, response.oanombrearchivo);
-                }
-                this.changeDetectorRef.markForCheck();
-            }).catch( (err: Error) => {
-                this.setShowWait(false);
-                this.util.addErrorMessage(err);
-                this.changeDetectorRef.markForCheck();
-            });
-        } else {
-            super.doAction(actionId);
-        }
-    }
-    
     /**
      * Initialize the display set elements
      */
@@ -364,12 +327,6 @@ export class SolicitudIIUuInclusionComponent extends AbstractIIU {
      * @param rows Rows to be check
      */
     public override checkPreconditionInAdvanceForRows(actionId: number, rows: any[]): boolean {
-
-        const action = this.getActionById(actionId);
-        if (action && action.targetClass === ModelConstants.Solicitud.name &&
-            action.targetUI === ModelConstants.Solicitud.siuutmarcarcompletada) {
-            return true;
-        }
         let isEnabled = true;
         for (const row of rows) {
             if (actionId === 2) {

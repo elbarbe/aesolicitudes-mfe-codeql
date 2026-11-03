@@ -218,7 +218,18 @@
                                 </ng-container>
                             </ng-container>
                             <ng-container *ngIf="col.type === 4">
-<span>img</span>
+                                <ng-container *ngIf="col.linkIndex >=0">
+                                    <span>
+                                        <img [src]="util.getSafeUrl('data:image/jpg;base64,' + rowData[col.field])"
+                                            (click)="onLinkClick($event, rowData, col.linkIsAction, col.linkIndex)"
+                                            (keydown)="onCellKeyDown($event, rowData, col.linkIsAction, col.linkIndex)"
+                                            alt="image data" />
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="col.linkIndex < 0">
+                                    <img [src]="util.getSafeUrl('data:image/jpg;base64,' + rowData[col.field])"
+                                        alt="image data" />
+                                </ng-container>
                             </ng-container>
                             <ng-container *ngIf="col.type === 5">
                                 <button type="button" class="btn"
@@ -333,11 +344,11 @@
                             (click)="piu.onRefresh()"
                             [title]="langMng.translateText('app_PIU_REFRESHBTN', '')"></button>
                         <button type="button" *ngIf="piu.gridData && piu.gridData.length > 0"
-                            class="btn btn-sm pi pi-file-excel" (click)="exportExcel()" style="padding: 2px;"
+                            class="btn btn-sm gridFooterBtnExport" (click)="exportExcel()"
                             [title]="langMng.translateText('app_PIU_EXPEXCELBTN', '')"></button>
                         <button type="button" *ngIf="piu.gridData && piu.gridData.length > 0"
-                            class="btn btn-sm pi pi-file-excel" (click)="exportExcelAll()" style="padding: 2px;"
-                            [title]="langMng.translateText('app_PIU_EXPALLEXCELBTN', '')">All</button>
+                            class="btn btn-sm gridFooterBtnExportAll" (click)="exportExcelAll()"
+                            [title]="langMng.translateText('app_PIU_EXPALLEXCELBTN', '')"></button>
                     </div>
                     <div class="gridSummaryRight">
                         <span class="gridFooterNumElements">{{piu.getGridTotalInstancesText()}}</span>
@@ -347,7 +358,41 @@
                                 (click)="piu.onSaveChangesEditableGrid()"
                                 [title]="langMng.translateText('app_SIU_BTNSAVE', '')"></button>
 
+                            <ng-container *ngIf="piu.showPreferences()">
+                                <div class="btn-group dropstart gridPreferencesMenu">
+                                    <button class="btn btn-sm pi pi-cog" id="dropdownMenuPref"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    </button>
 
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuPref">
+                                        <a class="dropdown-item"
+                                            (click)="piu.onGridPreferences()">{{langMng.translateText('app_PREF_MENUPREF', '')}}</a>
+                                        <a class="dropdown-item"
+                                            (click)="piu.saveGridPreferences()">{{langMng.translateText('app_PREF_MENUSAVE', '')}}</a>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+
+                            <ng-container *ngIf="piu.showGlobalLog || piu.showClassLog || piu.showInstanceLog">
+
+                                <div class="btn-group dropleft gridSummaryMenu">
+                                    <button class="btn btn-sm pi pi-eye" id="dropdownMenuLog"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    </button>
+
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLog">
+
+                                        <a *ngIf="piu.showGlobalLog" class="dropdown-item"
+                                            (click)="piu.onNavigateLogGlobal()">{{langMng.translateText('app_GLOBALLOG', 'Global Log')}}</a>
+                                        <a *ngIf="piu.showClassLog" class="dropdown-item"
+                                            (click)="piu.onNavigateLogClass()">{{langMng.translateText('app_CLASSLOG', 'Log Class')}}</a>
+                                        <a *ngIf="piu.showInstanceLog" class="dropdown-item"
+                                            (click)="piu.onNavigateLoginstance()">{{langMng.translateText('app_INSTANCELOG', '')}}</a>
+
+                                    </div>
+                                </div>
+                            </ng-container>
                         </div>
                     </div>
                 </div>

@@ -4,12 +4,10 @@ import { Util } from './app.utils';
 /**
  * « User functions »
  */
-import { AppGlobalInfo } from '../app.appglobalinfo';
-
 @Injectable({providedIn: 'root'})
 export class UserFunctions {
 
-    constructor(private util: Util, private appGlobalInfo: AppGlobalInfo) { }
+    constructor(private util: Util) { }
 
     /**
      * Devuelve la EPS Sanitas, esto es, la primera que tenga la marca de EPS Sanitas a true. Se utiliza en reglas de dependencia.
@@ -136,20 +134,15 @@ export class UserFunctions {
      * No comments
      */
     public fuGetFechaDesdeVarFiltro(): Promise<Date> {
-
-        // Devolvemos el valor de la ficha de inicio por defecto para consultas de solicitudes.
-        // El valor es la fecha actual menos los días indicados en el parmámetros de configuración que indica el perioso a utilizar
-        //  El parámetros es uno de lso datos que se cargan an la cache del usuario
-        let newDate = new Date();
-        // Si lo tenemos ...
-        if (this.appGlobalInfo.getLoggedUserInfo().userCache?.periodoConsultaSolicitudes) {
-            newDate.setDate(newDate.getDate() - this.appGlobalInfo.getLoggedUserInfo().userCache?.periodoConsultaSolicitudes);
-        } else {
-            // Si no tenemos el valor del parametros guardado, utilizamos por defecto 30 dias
-            newDate.setDate(newDate.getDate() - 30);
-        }
-
-        return  Promise.resolve( newDate);
+        const params = {};
+        return new Promise((resolve, reject) => {
+            // Call to the back end implementation
+            this.util.callUserFunctionInBackEnd('fuGetFechaDesdeVarFiltro', params, false).then((result: any) => {
+                resolve(result);
+            }).catch ((error: any) => {
+                reject(error);
+            });
+        });
     }
 
     /**

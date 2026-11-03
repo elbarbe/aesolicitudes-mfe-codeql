@@ -969,7 +969,53 @@ export class StandardFunctions {
         return parseFloat(value);
     }
 
+    /**
+     * Returns a uniformly distributed pseudo-random real number greater than or equal to 0
+     * and less than 1. The use of this method has a state because the generated sequence is
+     * pseudo-random, but it could be considered as stateless due to the imprecise relation among
+     * results from different calls.
+     */
+    public rnd(): number {
+        return Math.random();
+    }
 
+    /**
+     * Returns a uniformly distributed pseudo-random discrete (integer) number greater than or
+     * equal to 0 and less than upperBound.
+     * @param upperBound upperBound
+     */
+    public rndNumber(upperBound: number): number {
+        return Math.floor(Math.random() * upperBound);
+    }
+
+    /**
+     * Returns a uniformly distributed pseudo-random discrete (double) number greater than or
+     * equal to 0 and less than UpperBound.
+     * @param upperBound upperBound
+     */
+    public rndReal(upperBound: number): number {
+        return Math.random() * upperBound;
+    }
+
+    /**
+     * Returns a uniformly distributed pseudo-random discrete (integer) number greater than or
+     * equal to LowerBound and less than UpperBound.
+     * @param lowerBound lowerBound
+     * @param upperBound upperBound
+     */
+    public rndintbound(lowerBound: number, upperBound: number): number {
+        return Math.floor(Math.random() * (upperBound - lowerBound) + lowerBound);
+    }
+
+    /**
+     * Returns a uniformly distributed pseudo-random discrete (Double) number greater than or
+     * equal to LowerBound and less than UpperBound.
+     * @param lowerBound lowerBound
+     * @param upperBound upperBound
+     */
+    public rndrealbound(lowerBound: number, upperBound: number): number {
+        return Math.random() * (upperBound - lowerBound) + lowerBound;
+    }
 
     /**
      * Returns the hyperbolic sine of the argument value.

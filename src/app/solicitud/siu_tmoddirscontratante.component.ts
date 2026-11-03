@@ -966,7 +966,7 @@ export class SolicitudSIUuTMODDIRSCONTRATANTEComponent extends AbstractServiceIU
      * @param groupId Group id.
      */
     public isGroupVisible(groupId: string): boolean {
-        let isVisible = true;
+        let isVisible;
 
         if (groupId === '0') {
             isVisible = this.ptupuDireccionCompleta.visible ||

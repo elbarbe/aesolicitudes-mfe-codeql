@@ -52,7 +52,7 @@
                 </li>
             </ul>
             <div class="tab-content detailsContent">
-                <div class="tab-pane detalleContratante" [ngClass]=" {'active': activeDetail == 0}" >
+                <div class="tab-pane" [ngClass]=" {'active': activeDetail == 0}" *ngIf="d0Visible" role="tabpanel">
                         <h3 class="title">{{d0.title}}</h3>
 
                         <div class="master" [ngClass]="d0.cssClasses">
@@ -60,25 +60,43 @@
                             <div class="iiuRegion" [ngClass]="d0.master.cssClasses">
                                 <imes-actionsnavigations [queryIU]="d0.master"></imes-actionsnavigations>
                                 <!-- Display Set elements -->
-                                <div class="displaySet">
-                                    <div class="">
+                                <div class="card displaySet">
+                                    <div class="card-header">{{d0.master.title}}</div>
+                                    <div class="card-body">
                                         <imes-input-string [field]="d0.master.dseContratantedrvIdentificacion" *ngIf="d0.master.dseContratantedrvIdentificacion.visible"></imes-input-string>
                                     </div>
                                 </div>
+                                <div *ngIf="d0.master.showInstanceLog" class="iiuLogNavigation">
+                                    <a (click)="d0.master.onNavigateLoginstance()">{{d0.master.langMng.translateText('app_INSTANCELOG', 'Log Instance')}}</a>
+                                </div>
                             </div>
                         </div>
-                        <fieldset class="col-12 details"  [ngClass]="d0.cssClasses" >
-                            <div class="detailsContent">
-                                <div class="" >
+                        <fieldset class="col-12 details"  [ngClass]="d0.cssClasses" [disabled]="!enableDetails" *ngIf="d0.d0Visible || d0.d1Visible">
+                            <legend *ngIf="false">Details legend</legend>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" *ngIf="d0.d0Visible">
+                                    <a (click)="d0.setActiveDetail(0)" class="nav-link"
+                                            [ngClass]="{'active': d0.activeDetail == 0}" role="tab" tabindex
+                                            data-bs-toggle="tab">{{d0.d0.title}}</a>
+                                </li>
+                                <li class="nav-item" *ngIf="d0.d1Visible">
+                                    <a (click)="d0.setActiveDetail(1)" class="nav-link"
+                                            [ngClass]="{'active': d0.activeDetail == 1}" role="tab" tabindex
+                                            data-bs-toggle="tab">{{d0.d1.title}}</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content detailsContent">
+                                <div class="tab-pane" [ngClass]=" {'active': d0.activeDetail == 0}" *ngIf="d0.d0Visible" role="tabpanel">
                                         <h3 class="title">{{d0.d0.title}}</h3>
 
-                                        <div *ngIf="!d0.master.dseContratanteTipoIdentificacionNIT.value" class="master" [ngClass]="d0.d0.cssClasses">
-                                            <h3 class="">{{d0.d0.master.title}}</h3>
+                                        <div class="master" [ngClass]="d0.d0.cssClasses">
+                                            <h3 class="title">{{d0.d0.master.title}}</h3>
                                             <div class="iiuRegion" [ngClass]="d0.d0.master.cssClasses">
                                                 <imes-actionsnavigations [queryIU]="d0.d0.master"></imes-actionsnavigations>
                                                 <!-- Display Set elements -->
-                                                <div class=" displaySet">
-                                                    <div class="">
+                                                <div class="card displaySet">
+                                                    <div class="card-header">{{d0.d0.master.title}}</div>
+                                                    <div class="card-body">
                                                         <imes-input-radio [field]="d0.d0.master.dseContratanteDiplomatico" *ngIf="d0.d0.master.dseContratanteDiplomatico.visible"></imes-input-radio>
                                                         <imes-input-string [field]="d0.d0.master.dseContratantePrimerNombre" *ngIf="d0.d0.master.dseContratantePrimerNombre.visible"></imes-input-string>
                                                         <imes-input-string [field]="d0.d0.master.dseContratanteSegundoNombre" *ngIf="d0.d0.master.dseContratanteSegundoNombre.visible"></imes-input-string>
@@ -91,19 +109,34 @@
                                                         <imes-input-string [field]="d0.d0.master.dseContratanteMunicipioNacDescripcion" *ngIf="d0.d0.master.dseContratanteMunicipioNacDescripcion.visible"></imes-input-string>
                                                     </div>
                                                 </div>
+                                                <div *ngIf="d0.d0.master.showInstanceLog" class="iiuLogNavigation">
+                                                    <a (click)="d0.d0.master.onNavigateLoginstance()">{{d0.d0.master.langMng.translateText('app_INSTANCELOG', 'Log Instance')}}</a>
+                                                </div>
                                             </div>
                                         </div>
-                                        <fieldset *ngIf="d0.master.dseContratanteTipoIdentificacionNIT.value" class="col-12 details"  [ngClass]="d0.d0.cssClasses" >
-                                            <div class="detailsContent">
-                                                <div class="" >
-                                                        <h3 class="">{{d0.d0.d0.title}}</h3>
+                                        <fieldset class="col-12 details"  [ngClass]="d0.d0.cssClasses" [disabled]="!enableDetails" *ngIf="d0.d0.d0Visible">
+                                            <legend *ngIf="false">Details legend</legend>
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li class="nav-item" *ngIf="d0.d0.d0Visible">
+                                                    <a (click)="d0.d0.setActiveDetail(0)" class="nav-link"
+                                                            [ngClass]="{'active': d0.d0.activeDetail == 0}" role="tab" tabindex
+                                                            data-bs-toggle="tab">{{d0.d0.d0.title}}</a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content detailsContent">
+                                                <div class="tab-pane" [ngClass]=" {'active': d0.d0.activeDetail == 0}" *ngIf="d0.d0.d0Visible" role="tabpanel">
+                                                        <h3 class="title">{{d0.d0.d0.title}}</h3>
                                                         <div class="iiuRegion" [ngClass]="d0.d0.d0.cssClasses">
                                                             <imes-actionsnavigations [queryIU]="d0.d0.d0"></imes-actionsnavigations>
                                                             <!-- Display Set elements -->
-                                                            <div class=" displaySet">
-                                                                <div class="">
+                                                            <div class="card displaySet">
+                                                                <div class="card-header">{{d0.d0.d0.title}}</div>
+                                                                <div class="card-body">
                                                                     <imes-input-string [field]="d0.d0.d0.dseContratanteRazonSocial" *ngIf="d0.d0.d0.dseContratanteRazonSocial.visible"></imes-input-string>
                                                                 </div>
+                                                            </div>
+                                                            <div *ngIf="d0.d0.d0.showInstanceLog" class="iiuLogNavigation">
+                                                                <a (click)="d0.d0.d0.onNavigateLoginstance()">{{d0.d0.d0.langMng.translateText('app_INSTANCELOG', 'Log Instance')}}</a>
                                                             </div>
                                                         </div>
                                                 </div>
@@ -111,13 +144,13 @@
                                         </fieldset>
                                 </div>
                                 <div class="tab-pane" [ngClass]=" {'active': d0.activeDetail == 1}" *ngIf="d0.d1Visible" role="tabpanel">
-                                        <h3 class="">{{d0.d1.title}}</h3>
+                                        <h3 class="title">{{d0.d1.title}}</h3>
                                         <div class="iiuRegion" [ngClass]="d0.d1.cssClasses">
                                             <imes-actionsnavigations [queryIU]="d0.d1"></imes-actionsnavigations>
                                             <!-- Display Set elements -->
-                                            <div class=" displaySet">
-                                                <!-- <div class="card-header">{{d0.d1.title}}</div> -->
-                                                <div class="">
+                                            <div class="card displaySet">
+                                                <div class="card-header">{{d0.d1.title}}</div>
+                                                <div class="card-body">
                                                     <imes-input-string [field]="d0.d1.dseDireccionDireccionCompleta" *ngIf="d0.d1.dseDireccionDireccionCompleta.visible"></imes-input-string>
                                                     <imes-input-string [field]="d0.d1.dseDireccionDepartamentoDescripcion" *ngIf="d0.d1.dseDireccionDepartamentoDescripcion.visible"></imes-input-string>
                                                     <imes-input-string [field]="d0.d1.dseDireccionMunicipioDescripcion" *ngIf="d0.d1.dseDireccionMunicipioDescripcion.visible"></imes-input-string>
@@ -233,22 +266,53 @@
                         </div>
                 </div>
                 <div class="tab-pane" [ngClass]=" {'active': activeDetail == 2}" *ngIf="d2Visible" role="tabpanel">
-                        
-                        <fieldset class="col-12 details"  [ngClass]="d2.cssClasses" [disabled]="!enableDetails" *ngIf="d2.d0Visible || d2.d1Visible">
-                            
-                            <div class="">
-                                    <h3 class="title">{{d2.d0.title}}</h3>
-                                    <div class="piuRegion" [ngClass]="d2.d0.cssClasses">
-                                        <imes-actionsnavigations [queryIU]="d2.d0"></imes-actionsnavigations>
-                                        <imes-grid [piu]="d2.d0"></imes-grid>
+                        <h3 class="title">{{d2.title}}</h3>
+
+                        <div class="master" [ngClass]="d2.cssClasses">
+                            <h3 class="title">{{d2.master.title}}</h3>
+                            <div class="iiuRegion" [ngClass]="d2.master.cssClasses">
+                                <imes-actionsnavigations [queryIU]="d2.master"></imes-actionsnavigations>
+                                <!-- Display Set elements -->
+                                <div class="card displaySet">
+                                    <div class="card-header">{{d2.master.title}}</div>
+                                    <div class="card-body">
+                                        <imes-input-string [field]="d2.master.dseNumFamilia" *ngIf="d2.master.dseNumFamilia.visible"></imes-input-string>
                                     </div>
+                                </div>
+                                <div *ngIf="d2.master.showInstanceLog" class="iiuLogNavigation">
+                                    <a (click)="d2.master.onNavigateLoginstance()">{{d2.master.langMng.translateText('app_INSTANCELOG', 'Log Instance')}}</a>
+                                </div>
                             </div>
-                            <div class="">
-                                    <h3 class="title">{{d2.d1.title}}</h3>
-                                    <div class="piuRegion" [ngClass]="d2.d1.cssClasses">
-                                        <imes-actionsnavigations [queryIU]="d2.d1"></imes-actionsnavigations>
-                                        <imes-grid [piu]="d2.d1"></imes-grid>
-                                    </div>
+                        </div>
+                        <fieldset class="col-12 details"  [ngClass]="d2.cssClasses" [disabled]="!enableDetails" *ngIf="d2.d0Visible || d2.d1Visible">
+                            <legend *ngIf="false">Details legend</legend>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" *ngIf="d2.d0Visible">
+                                    <a (click)="d2.setActiveDetail(0)" class="nav-link"
+                                            [ngClass]="{'active': d2.activeDetail == 0}" role="tab" tabindex
+                                            data-bs-toggle="tab">{{d2.d0.title}}</a>
+                                </li>
+                                <li class="nav-item" *ngIf="d2.d1Visible">
+                                    <a (click)="d2.setActiveDetail(1)" class="nav-link"
+                                            [ngClass]="{'active': d2.activeDetail == 1}" role="tab" tabindex
+                                            data-bs-toggle="tab">{{d2.d1.title}}</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content detailsContent">
+                                <div class="tab-pane" [ngClass]=" {'active': d2.activeDetail == 0}" *ngIf="d2.d0Visible" role="tabpanel">
+                                        <h3 class="title">{{d2.d0.title}}</h3>
+                                        <div class="piuRegion" [ngClass]="d2.d0.cssClasses">
+                                            <imes-actionsnavigations [queryIU]="d2.d0"></imes-actionsnavigations>
+                                            <imes-grid [piu]="d2.d0"></imes-grid>
+                                        </div>
+                                </div>
+                                <div class="tab-pane" [ngClass]=" {'active': d2.activeDetail == 1}" *ngIf="d2.d1Visible" role="tabpanel">
+                                        <h3 class="title">{{d2.d1.title}}</h3>
+                                        <div class="piuRegion" [ngClass]="d2.d1.cssClasses">
+                                            <imes-actionsnavigations [queryIU]="d2.d1"></imes-actionsnavigations>
+                                            <imes-grid [piu]="d2.d1"></imes-grid>
+                                        </div>
+                                </div>
                             </div>
                         </fieldset>
                 </div>

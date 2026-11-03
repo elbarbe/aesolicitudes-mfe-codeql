@@ -1,22 +1,13 @@
 export const environment = {
-  version: '3.0.0',
+  version: 'x.y.z',
   prefix: 'aesolicitudes',
   production: false,
   standalone: true,
   msal: {
-    clientId: 'feac80f8-9e48-40e1-bcd4-a1b75148ec44',
-    authority: 'https://login.microsoftonline.com/8ca9fee9-9f9d-4340-8cbb-05498e9baa9a',
+    clientId: 'your-client-Id',
+    authority: 'your-authority',
     redirectUri: 'http://localhost:4204'
   },  
-  urlms: 'http://localhost:8080',
-  bhservicesinfo: {
-    documental: {
-      url: '',
-      idfolder_docidentificacion: '',
-      idfolder_docsolicitud: '',
-      documentClass_docidentificacion: '',
-      documentClass_docsolicitud: ''
-    }
-  }
+  urlms: 'http://localhost:8080'
 };
 

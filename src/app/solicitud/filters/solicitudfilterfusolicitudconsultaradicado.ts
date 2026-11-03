@@ -10,8 +10,6 @@ import { LanguageMng } from '../../common/languageMng';
 import { UserFunctions } from '../../common/userFunctions';
 import { AbstractPIU } from '../../common/abstractPIU';
 
-import { QueryResponse } from 'src/app/common/answerRequestInformation';
-
 /**
  * « Manages the filter F_SolicitudConsultaRadicado of class Solicitud »
  */
@@ -48,26 +46,6 @@ export class SolicitudFilterFuSolicitudConsultaRadicado extends AbstractFilter {
         this.vouTipoDoc = new FieldOVPreload(this.langMng);
         this.vuNumDoc = new Field(this.langMng);
         this.voPersona = new FieldOVLenseSearch(this.langMng, this.util);
-    }
-
-    public override canBeExecuted(): boolean {
-        if (!super.canBeExecuted()) {
-            return false;
-        }
-
-        // Comprobamos que el periodo entre las fechas indicadas o supera el limite
-        const diferencia = this.stdFun.daysDifferenceFromDate(this.vfDesde.value, this.vfHasta.value);
-        let periodo = 30;
-        if (this.appGlobalInfo.getLoggedUserInfo().userCache?.periodoConsultaSolicitudes) {
-            periodo = this.appGlobalInfo.getLoggedUserInfo().userCache?.periodoConsultaSolicitudes;
-        }
-        let canExe = diferencia <= periodo;
-
-        if (!canExe) {
-            this.util.addErrorMessage('Las fechas introducidas superan el periodo máximo de ' + 
-                periodo + ' días permitido. Modifique las fechas para ajustarse al periodo indicado');
-        }
-        return canExe;
     }
 
     /**
@@ -137,31 +115,6 @@ export class SolicitudFilterFuSolicitudConsultaRadicado extends AbstractFilter {
         this.voPersona.maxLength = 454;
         this.voPersona.assignCSS(this.populationContainer !== undefined);
         this.variables.push(this.voPersona);
-        this.voPersona.enabled = false;
-    }
-
-    public buscarPersona(): void {
-        this.voPersona.clean();
-        const tipoIdent = this.vouTipoDoc.getSingleValue();
-
-        if (tipoIdent && this.vuNumDoc.value) {
-            // Buscamos a la apersona por tipo y numero de identificacion 
-            // Si existe, le pasamos el Oid a la ariable voPersona
-            let filtro = this.util.getFilter('F_PersonaConsultarCORE');
-            filtro = this.util.addFilterVariable(filtro, 'vo_TipoIdentificacion', tipoIdent);
-            filtro = this.util.addFilterVariable(filtro, 'v_NumIdentificacion', this.vuNumDoc.value);
-            const query = this.util.getQueryRequest('identificador',[filtro],'',1);
-            this.util.callQuery(ModelConstants.Persona.name, query).then( (resultado: QueryResponse) => {
-                if (resultado.results.length > 0) {
-                    this.voPersona.setValue(JSON.parse(resultado.results[0].oid));
-                    this.executeDependecyRulesvopersona('SetValue', true);
-                    this.search();
-                }
-            }).catch( (error: Error) => {
-
-            });
-
-        }
     }
 
     /**
