@@ -188,7 +188,7 @@ export class CuestionarioPIIUuCuestionarioComponent extends AbstractIIU implemen
             valorAntRespuestaSiNo: '',
             valorAntValoresRespuestas: '',
             valorAntRespuestaObs: '',
-        }
+        };
 
         pregunta.oid = preg.oid;
         pregunta.identificador = QueryResponse.getValue(preg, 'identificador');
@@ -285,8 +285,8 @@ export class CuestionarioPIIUuCuestionarioComponent extends AbstractIIU implemen
                 }
 			}
 		}
-		else{
-			pregunta.valorSeleccionadoCombo = ''
+		else {
+			pregunta.valorSeleccionadoCombo = '';
             pregunta.respuestaNum = '';
 		}        
 

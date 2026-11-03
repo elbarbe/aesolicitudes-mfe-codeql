@@ -189,7 +189,6 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
         this.limpiarCampos();
 
         const varputhissolicitud = this.getFirstInstanceFromCache(this.ptSolicitud);
-        const permiteRechazados = varputhissolicitud.get('drvPermiteRechazados');
         const planVoluntario = varputhissolicitud.get('AE_SOLICITUDES.PlanT.EsVoluntario');
         const numSol = varputhissolicitud.get('NumRadicado');
 
@@ -330,8 +329,8 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
                     address: dir,
                     telefonoFijo: BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom),
                     telefonoCelular: BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom)
-                }
-                this.ptDireccionesXClass.options.push({key: datoDireccion, value: dir.text})
+                };
+                this.ptDireccionesXClass.options.push({key: datoDireccion, value: dir.text});
                 i++;
             }
         }
@@ -432,7 +431,7 @@ export class PersonaSIUuTADDUSUARIOASOLComponent extends AbstractServiceIU imple
             }).catch( (err: Error) => {
                 this.setShowWait(false);
                 this.util.addErrorMessage(err);
-            })
+            });
         } else {
             this.ptupuagrPais.clean();
         }

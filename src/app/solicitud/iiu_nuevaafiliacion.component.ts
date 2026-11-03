@@ -15,7 +15,7 @@ import { UserFunctions } from '../common/userFunctions';
  * « Implements IIU IIU_NuevaAfiliacion of Solicitud »
  */
 import { GlobalServicesServices } from '../globalservices/globalservices.services';
-import { ErrorInformation, LogicError } from '../common/answerRequestInformation';
+import { LogicError } from '../common/answerRequestInformation';
 
 export class SolicitudIIUuNuevaAfiliacionComponent extends AbstractIIU {
 

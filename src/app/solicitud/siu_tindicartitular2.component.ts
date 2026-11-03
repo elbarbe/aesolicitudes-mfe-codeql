@@ -218,7 +218,7 @@ export class SolicitudSIUuTINDICARTITULAR2Component extends AbstractServiceIU im
         this.ptDCTelefonoCelular.clean();
         this.ptReplicarDir.value = false;
         this.ptupuCodigo.clean();
-        this.ptupuTieneEPSSanitas.value = false
+        this.ptupuTieneEPSSanitas.value = false;
         this.ptupuRechazadoAfiliacion.value = false;
         this.ptupuTitularBeneficios.value = true;
         this.ptEstadoPersona.clean();

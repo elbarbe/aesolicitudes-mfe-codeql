@@ -1,12 +1,10 @@
 import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AppGlobalInfo } from '../app.appglobalinfo';
-import { CacheDependencyRules, InstanceCache } from '../common/app.cachedependencyrules';
 import { Field, FieldDefinedSelection, FieldOVLenseSearch } from '../common/baseIUElements';
 import { AbstractServiceIU } from '../common/abstractSIU';
 import { ExchangeInfo } from '../common/app.exchangeinfo';
 import { ModelConstants } from '../common/model.constants';
 import { Util } from '../common/app.utils';
-import { DefinedSelections } from '../common/definedSelection';
 import { StandardFunctions } from '../common/standardFunctions';
 import { LanguageMng } from '../common/languageMng';
 import { ConditionalNavigationMng } from '../common/conditionalNavigationMng';

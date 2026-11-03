@@ -230,7 +230,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
         this.ptReplicarDireccion.value = false;
         this.ptupuCodigoCORE.clean();
         this.executeDependecyRulesptupucodigocore('SetValue', true);
-        this.ptuTieneEPSSanitas.value = false
+        this.ptuTieneEPSSanitas.value = false;
         this.ptuRechazadoAfiliacion.value = false;
         this.puTitularBeneficios.value = true;
         this.ptuDiplomatico.value = false;
@@ -559,8 +559,8 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
                     address: dir,
                     telefonoFijo: BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom),
                     telefonoCelular: BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom)
-                }
-                this.ptuDireccionesXClass.options.push({ key: datoDireccion, value: dir.text })
+                };
+                this.ptuDireccionesXClass.options.push({ key: datoDireccion, value: dir.text });
                 i++;
             }
         }
@@ -660,7 +660,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
             }).catch((err: Error) => {
                 this.setShowWait(false);
                 this.util.addErrorMessage(err);
-            })
+            });
         } else {
             this.ptupuPais.clean();
         }
