@@ -66,7 +66,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -127,7 +126,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -178,7 +176,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -348,7 +345,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -414,7 +410,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -595,7 +590,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         return new Promise<any>((resolve, reject) => {
@@ -630,7 +624,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         return new Promise<any>((resolve, reject) => {
@@ -665,7 +658,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -713,7 +705,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
@@ -751,7 +742,6 @@ export class BHServicesUtil {
             headers = headers.set('Authorization', 'Bearer ' + this.appGlobalInfo.getLoggedUserInfo().token);
         }
         headers = headers.set('API-Version', this.appGlobalInfo.apiVersion);
-        const responseType = 'json';
         const options = { headers, observe: 'response' as 'body', responseType: 'json' as 'json', withCredentials: true };
 
         const peticion = {
