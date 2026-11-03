@@ -100,7 +100,7 @@ export abstract class AbstractPIU extends AbstractQueryIU {
                 protected langMng: LanguageMng,
                 protected override condNavMng: ConditionalNavigationMng) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
-        this.scenarioType = 'PIU';
+        this.scenarioType = ScenarioType.Population;
     }
 
     /**
