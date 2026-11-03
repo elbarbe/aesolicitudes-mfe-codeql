@@ -17,6 +17,9 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements MDIU MDIU_NuevaAfiliacion of Solicitud »
  */
+import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
+import { GestionCache } from '../common/gestionCache';
+
 @Component({
     selector: 'imes-solicitud-mdiu-nuevaafiliacion',
     templateUrl: './mdiu_nuevaafiliacion.component.html',
@@ -58,7 +61,8 @@ export class SolicitudMDIUuNuevaAfiliacionComponent extends AbstractMDIU impleme
     constructor(public override appGlobalInfo: AppGlobalInfo, public override util: Util,
                 public override changeDetectorRef: ChangeDetectorRef,
                 public langMng: LanguageMng, public stdFun: StandardFunctions,
-                public condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
+                public condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
+                private bhservicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
         super(appGlobalInfo, util, changeDetectorRef);
         this.idXML = 'Clas_1431957012480960UIMaDet_1';
         this.className = ModelConstants.Solicitud.name;
@@ -75,7 +79,7 @@ export class SolicitudMDIUuNuevaAfiliacionComponent extends AbstractMDIU impleme
         this.d0Visible = this.appGlobalInfo.getLoggedUserInfo().isDetailVisible(this.idXML, 'Clas_1431957012480960UIMaDet_1Det_6',
             ['Admin', 'SuperAdmin', 'Asesor', 'AreaMedica', 'Afiliaciones', 'Gestor', 'MesaDeApoyo']);
         this.d0 = new SolicitudIIUuInfoContratanteEditableComponent(appGlobalInfo, util, changeDetectorRef, langMng, stdFun,
-            condNavMng, usrFunc);
+            condNavMng, usrFunc, bhservicesUtil, gestionCache);
         this.d0.masterDetailContainer = this;
         if (this.d0Visible) {
             this.details.push(this.d0);

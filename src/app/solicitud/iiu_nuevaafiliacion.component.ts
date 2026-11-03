@@ -14,6 +14,9 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements IIU IIU_NuevaAfiliacion of Solicitud »
  */
+import { GlobalServicesServices } from '../globalservices/globalservices.services';
+import { ErrorInformation, LogicError } from '../common/answerRequestInformation';
+
 export class SolicitudIIUuNuevaAfiliacionComponent extends AbstractIIU {
 
     /** Display Set elements */
@@ -24,6 +27,8 @@ export class SolicitudIIUuNuevaAfiliacionComponent extends AbstractIIU {
     public dseEsTraslado: FieldDefinedSelection;
     public dseEnvioCarnetFisico: FieldDefinedSelection;
     public dseFirmaImagenFirma: FieldBlob;
+
+    private globalServices: GlobalServicesServices;
 
     /**
      * Component constructor
@@ -58,6 +63,8 @@ export class SolicitudIIUuNuevaAfiliacionComponent extends AbstractIIU {
         this.dseEsTraslado = new FieldDefinedSelection(this.langMng);
         this.dseEnvioCarnetFisico = new FieldDefinedSelection(this.langMng);
         this.dseFirmaImagenFirma = new FieldBlob(this.langMng);
+
+        this.globalServices = new GlobalServicesServices(appGlobalInfo, util);        
         this.cssClasses += 'cssNavPrimero';
     }
 
@@ -158,6 +165,42 @@ export class SolicitudIIUuNuevaAfiliacionComponent extends AbstractIIU {
         this.dseFirmaImagenFirma.dataType = Field.dtBlob;
         this.dseFirmaImagenFirma.assignCSS();
         this.fields.push(this.dseFirmaImagenFirma);
+
+    }
+
+    public override doAction(actionId: number): void {
+
+        const action = this.getActionById(actionId);
+        if (action && action.targetClass === ModelConstants.Solicitud.name &&
+            action.targetUI === ModelConstants.Solicitud.siuuenviarsmsinfopago &&
+            this.getSelectedOids().length === 1) {
+            // Lanzamos el servicio de info pago y generamos el PDF
+            this.setShowWait(true);
+            // Lanzamos el servicio ignorando la respuesta
+            this.util.executeNoShowService( ModelConstants.Solicitud.name,
+                action.noShowServiceName,
+                this.getSelectedOids()[0],
+                action.noShowArgumentName);
+
+            const request: {ptsolicitud_oid: any, pttipo: number} = { ptsolicitud_oid: this.getSelectedOids()[0], pttipo: 0};
+            const url = this.appGlobalInfo.APPCONSTANTS.BASE_URL + '/api/GlobalServicesApi/OGETREPORTE';
+            this.util.callHttpPost(url, request, false).then((response: any) => {
+                this.setShowWait(false);
+                const posibleError = new LogicError(response);
+                if (posibleError.IsError()) {
+                    this.util.addErrorMessage(posibleError.message);
+                } else  if (response.oaarchivo && response.oanombrearchivo) {
+                    this.util.openInNewWindow(response.oaarchivo, response.oanombrearchivo);
+                }
+                this.changeDetectorRef.markForCheck();
+            }).catch( (err: Error) => {
+                this.setShowWait(false);
+                this.util.addErrorMessage(err);
+                this.changeDetectorRef.markForCheck();
+            });
+        } else {
+            super.doAction(actionId);
+        }
 
     }
 

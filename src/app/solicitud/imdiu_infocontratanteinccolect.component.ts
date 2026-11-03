@@ -78,6 +78,7 @@ export class SolicitudIMDIUuInfoContratanteINCColectComponent extends AbstractMD
         if (this.d1Visible) {
             this.details.push(this.d1);
         }
+        this.loadDetailsOnDemand = false;
     }
 
     public ngOnInit(): void {

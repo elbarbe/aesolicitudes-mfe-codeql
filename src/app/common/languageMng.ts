@@ -105,7 +105,7 @@ export class LanguageMng {
         // Or assign fixed ones, if you prefer ...
         this.decimalSeparator = getLocaleNumberSymbol(this.currentLanguage, NumberSymbol.Decimal);
         this.groupSeparator = getLocaleNumberSymbol(this.currentLanguage, NumberSymbol.Group);
-        this.inputDateFormat = getLocaleDateFormat(this.currentLanguage, FormatWidth.Short).toLowerCase();
+        //this.inputDateFormat = getLocaleDateFormat(this.currentLanguage, FormatWidth.Short).toLowerCase();
     }
 
     /**

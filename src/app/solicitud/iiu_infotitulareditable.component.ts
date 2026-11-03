@@ -14,6 +14,9 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements IIU IIU_InfoTitularEditable of Solicitud »
  */
+import { GestionCache } from '../common/gestionCache';
+import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
+
 export class SolicitudIIUuInfoTitularEditableComponent extends AbstractIIU {
 
     /** Display Set elements */
@@ -35,7 +38,8 @@ export class SolicitudIIUuInfoTitularEditableComponent extends AbstractIIU {
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
+        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431957012480960UIInst_20';
         this.className = ModelConstants.Solicitud.name;
@@ -50,11 +54,16 @@ export class SolicitudIIUuInfoTitularEditableComponent extends AbstractIIU {
 
         // Associated service
         this.asrv = new SolicitudSIUuTINDICARTITULAR2Component(appGlobalInfo,
-            util, changeDetectorRef, langMng, stdFun, condNavMng, usrFunc);
+            util, changeDetectorRef, langMng, stdFun, condNavMng, usrFunc, bhServicesUtil, gestionCache);
         this.asrv.queryContainer = this;
         this.associatedService = this.asrv;
 
         this.dseAeusolicitudesNumerousolicitud = new Field(this.langMng);
+    }
+
+    public override processAssociatedServiceExecutionSuccess(): void {
+        this.util.addErrorMessage('Ejecución exitosa');
+        super.processAssociatedServiceExecutionSuccess();
     }
 
     /**

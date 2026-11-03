@@ -197,6 +197,11 @@ export class GenericSiuComponent implements OnInit {
                 } else {
                     this.executeService(this.oidList.pop(), errorList, executionCount, totalExecutions);
                 }
+                // Caso particular
+                if (this.className === ModelConstants.Solicitud.name &&
+                    this.serviceIUName === ModelConstants.Solicitud.siuutmarcarcompletada) {
+                        this.processCancel();
+                }
             });
     }
 
@@ -218,6 +223,11 @@ export class GenericSiuComponent implements OnInit {
                 this.waitingServiceResponse = false;
                 if (executionCount > 1) {
                     this.processCancel(true);
+                }
+                // Caso particular
+                if (this.className === ModelConstants.Solicitud.name &&
+                    this.serviceIUName === ModelConstants.Solicitud.siuutmarcarcompletada) {
+                        this.processCancel();
                 }
             }
         } else {
@@ -246,6 +256,12 @@ export class GenericSiuComponent implements OnInit {
     public processCancel(lastExecutionSuccess = false): void {
         this.util.hideProgressBar();
         if (this.exchangeInfo) {
+
+            // Caso particular de marcar completada
+            if (lastExecutionSuccess && this.className === ModelConstants.Solicitud.name &&
+                this.serviceIUName === ModelConstants.Solicitud.siuutmarcarcompletada) {
+                    this.exchangeInfo.comeBackContext = this.exchangeInfo?.comeBackContext?.exchangeInfo?.comeBackContext;
+            }
             if (this.util.processCancelInPopup(lastExecutionSuccess)) {
                 // Remove the top element in the context stack
                 if (this.exchangeInfo?.comeBackContext?.exchangeInfo) {

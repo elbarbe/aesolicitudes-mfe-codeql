@@ -1,0 +1,169 @@
+/*  Ajustes para el Look & Feel de Afiliación Electrónica */
+
+/* Ajustamos ancho de acciones y navegaciones */
+.paraAE imes-solicitud-mdiu-nuevaafiliacion .iiuRegion .actionsNavigations .action, 
+.paraAE imes-solicitud-mdiu-nuevaafiliacion .iiuRegion .actionsNavigations .navigation,
+.paraAE imes-solicitud-mdiu-inclusionfamiliar .iiuRegion .actionsNavigations .action, 
+.paraAE imes-solicitud-mdiu-inclusionfamiliar .iiuRegion .actionsNavigations .navigation,
+.paraAE imes-solicitud-mdiu-inclusioncolectivo .iiuRegion .actionsNavigations .action, 
+.paraAE imes-solicitud-mdiu-inclusioncolectivo .iiuRegion .actionsNavigations .navigation
+
+{
+    width: auto !important;
+}
+.paraAE imes-solicitud-mdiu-nuevaafiliacion .iiuRegion .actionsNavigations button,
+.paraAE imes-solicitud-mdiu-inclusionfamiliar .iiuRegion .actionsNavigations button,
+.paraAE imes-solicitud-mdiu-inclusioncolectivo .iiuRegion .actionsNavigations button {
+        width: auto !important;
+}
+
+.paraAE imes-solicitud-mdiu-inclusionfamiliar .detalleContratante,
+.paraAE imes-solicitud-mdiu-inclusioncolectivo .detalleContratante {
+    width: 570px;
+    margin: auto;
+}
+
+/* Campo firma */
+.paraAE imes-solicitud-mdiu-nuevaafiliacion .imesBlobImage,
+.paraAE imes-solicitud-mdiu-inclusionfamiliar .imesBlobImage,
+.paraAE imes-solicitud-mdiu-inclusioncolectivo .imesBlobImage {
+    width: 150px !important;
+    position: absolute;
+    left: 600px;
+}
+/* Cuestionario medico */
+.paraAE imes-cuestionariop-iiu-cuestionario .displaySet {
+    width: 670px !important;
+    height: 643px;
+    display: block;
+    padding: 0px !important;
+}
+.paraAE imes-cuestionariop-iiu-cuestionario .iiuRegion .card.displaySet .card-body {
+    width: 100%;
+    float: left;
+    display: block;
+    padding: 5px 0px 0px 0px !important;
+}
+.paraAE .exMeBtnMarcarDiligenciado, .paraAE .exMeBtnGrabar {
+    width: 50%;
+    float: left;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.paraAE .examenMedico button {
+    width: 160px;
+}
+.paraAE .panelExamenMedico {
+    width: 100%;
+    overflow: auto;
+    height: 563px;
+    float: left;
+    border-width: 1px;
+    border-style: solid;
+    margin-top: 5px;
+}
+.paraAE .exMeCabSeccion {
+    clear: left;
+    float: left;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    min-height: 17px;
+}
+.paraAE .exMeCabSeccionTexto {
+    background-color: aliceblue;
+    color: #4B94BF !important;
+    text-align: center;
+    min-height: 22px;
+    border: 1px solid;
+}
+.paraAE .exMeCabSeccionTexto label {
+    white-space: normal;
+    height: auto;
+}
+.paraAE .exMePreguntas {
+    clear: left;
+    float: left;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+}
+.paraAE .exPregunta {
+    border: 1px solid #4B94BF;
+    float: left;
+    /* display: block; */
+    width: 100%;
+}
+.paraAE .exMePreTexto {
+    float: left;
+    width: 430px;
+    margin-right: 10px;
+    padding-left: 5px;
+}
+.paraAE .exMePreTexto label {
+    width: 100%;
+    word-wrap: break-word;
+    height: auto;
+    white-space: normal;
+    float: left;
+    text-align: left;
+}
+.paraAE .exMePreRespSiNo {
+    width: 100px;
+    float: left;
+}
+.paraAE .exMePreRespObs {
+    width: 100%;
+    display: block;
+    float: left;
+    padding: 0px 5px 5px 5px;
+}
+.paraAE .exPregunta textarea {
+    width: 100% !important;
+}
+.paraAE .exMePreRespMultiple {
+    display: block;
+    float: left;
+    width: 105px;
+}
+.paraAE .exMePreRespCombo {
+    width: 106px;
+    float: left;
+    display: block;
+}
+.paraAE .exMePreRespCombo select {
+    width: 100% !important;
+    float: left;
+}
+
+.exMeOpcionRespMultiple.ng-star-inserted {
+    border: 1px solid #4B94BF;
+    float: left;
+    width: 100%;
+    /* border-collapse: collapse; */
+}
+.exMeOpcionRespMultiple label {
+    width: 80px;
+    height: auto;
+    float: left;
+    padding-left: 3px;
+}
+.paraAE .exMeOpcionRespMultiple p-checkbox {
+    float: right;
+    display: block;
+}
+.paraAE .exMeOpcionRespMultiple .p-checkbox-box {
+    height: 15px;
+}
+.paraAE .exMePreRespNum {
+	width: 45px;
+	float: left;
+	margin-left: 3px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.paraAE .exMePreRespNum input.form-control {
+    width: 100% !important;
+    text-align: right;
+}

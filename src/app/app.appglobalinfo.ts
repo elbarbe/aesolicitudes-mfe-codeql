@@ -41,6 +41,51 @@ export class LoggedUserInfo {
     /** User cache  */
     public userCache: any;
 
+    /**
+     * Devuelve el valor de la propiedad si se encuentra en la cache:
+     * - userName
+     * - periodoConsultaSolicitudes
+     * - sizeAdjuntos
+     * - modDBasicosPersona
+     * - esIntegral
+     * - verContratoNovedad
+     * - verDBasicosPersona
+     * - verDocIdentificacionPersona
+     * - accesoValidadorUsuarios
+     * - expExcelBlockSize
+     * - expExcelBlockSize
+     * - expExcelTimeout
+     * @param clave 
+     */
+    public getValorDeCache(clave: string): any {
+        if (this.userCache && clave) {
+            for (const key of Object.keys(this.userCache)) {
+                if (clave.toLowerCase() === key.toLowerCase()) {
+                    return this.userCache[key];
+                }
+            }            
+        }
+        return undefined;
+    }
+
+    public puedeVerDatosPersona(): boolean {
+        const puede = this.getValorDeCache('verDBasicosPersona');
+        // Si no existe el valor de la clave, asumimos que sí que puede
+        if (puede === null || puede === undefined || puede === '') {
+            return true;
+        }
+        return puede;
+    }
+
+    public puedeModificarDatosPersona(): boolean {
+        const puede = this.getValorDeCache('modDBasicosPersona');
+        // Si no existe el valor de la clave, asumimos que sí que puede
+        if (puede === null || puede === undefined || puede === '') {
+            return true;
+        }
+        return puede;
+    }
+
 
     /**
      * Deserialize the user information stored in session
@@ -537,6 +582,8 @@ export class AppGlobalInfo {
         this.loggedUserInfo = null;
         sessionStorage.removeItem('loggedUserInfo');
         this.infoChanged.next();
+        sessionStorage.setItem('aelogoutrequested', '1');
+        window.location.href = environment.msal.redirectUri;
     }
 
 

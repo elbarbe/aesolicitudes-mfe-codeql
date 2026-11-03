@@ -10,6 +10,8 @@ import { StandardFunctions } from '../common/standardFunctions';
 import { LanguageMng } from '../common/languageMng';
 import { ConditionalNavigationMng } from '../common/conditionalNavigationMng';
 import { UserFunctions } from '../common/userFunctions';
+import { SolicitudServices } from './solicitud.services';
+import { BHGestorAtomicUtil, RespuestaGestorAtomic } from '../bhcallutils/bhgestoratomicutil';
 @Component({
     selector: 'imes-solicitud-siu-tsubirdocumentoato',
     templateUrl: './siu_tsubirdocumentoato.component.html',
@@ -28,6 +30,9 @@ export class SolicitudSIUuTSUBIRDOCUMENTOATOComponent extends AbstractServiceIU 
     public ptNumSolicitud: Field;
     public ptNumIdentUsuario: Field;
 
+    private file: any;
+    private solSrv: SolicitudServices;
+
     /**
      * Component constructor
      * @param appGlobalInfo Application Global Information
@@ -41,6 +46,7 @@ export class SolicitudSIUuTSUBIRDOCUMENTOATOComponent extends AbstractServiceIU 
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
+        private gestorUtil: BHGestorAtomicUtil,
         public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431957012480960Ser_171UIServ_1';
@@ -64,10 +70,79 @@ export class SolicitudSIUuTSUBIRDOCUMENTOATOComponent extends AbstractServiceIU 
         this.ptNumSolicitud = new Field(this.langMng);
         this.ptNumIdentUsuario = new Field(this.langMng);
 
+        // Nos suscribimos al evento de cambio del fichero
+        this.pfFichero.fileLoadComplete.subscribe( (data: any) => this.processLoadFileComplete(data));
+        this.solSrv = new SolicitudServices(this.appGlobalInfo, this.util);
+
     }
 
     public ngOnInit(): void {
         this.myngOnInit();
+    }
+
+    private processLoadFileComplete(data: {success: boolean, message: string, file: any}): void {
+        // Nos guardamos el fichero
+        if (data.file) {
+            this.file = data.file;
+        } else {
+            this.file = null;
+        }
+    }
+
+    public override saveChanges(): void {
+
+        // Comprobamos que tengamos seleccinado tan solo 1 fichero
+        if (!this.file) {
+            this.util.addErrorMessage('Debe seleccionar un archivo');
+            return;
+        }
+        // Comprobamos que tengamos seleccinado 1 persona
+        if (!this.ptPersona.getSingleValue()) {
+            this.util.addErrorMessage('Debe seleccionar una persona');
+            return;
+        }
+        // Comprobamos que tengamos seleccinado el tipo de documento
+        if (!this.ptupuatrTipo.value) {
+            this.util.addErrorMessage('Debe seleccionar un tipo de documento');
+            return;
+        }
+
+        this.setShowWait(true);
+        this.gestorUtil.subirArchivo(this.file,
+            this.ptNombre.value,
+            this.ptupuatrTipo.value == 2,
+            this.ptNumIdentUsuario.value,
+            this.ptNumSolicitud.value).then( (respuesta: RespuestaGestorAtomic) => {
+
+                this.setShowWait(false);
+
+                if (!respuesta.exito) {
+                    this.util.addErrorMessage(respuesta.textoError);
+                } else {
+                    this.setShowWait(true);
+                    this.changeDetectorRef.markForCheck();
+                    this.solSrv.tSUBIRDOCUMENTOATO( this.puthisSolicitud.getSingleValue(),
+                        this.ptupuatrDescripcion.value,
+                        this.ptupuatrTipo.value,
+                        respuesta.extensionArchivo,
+                        this.ptPersona.getSingleValue(),
+                        respuesta.idGestor,
+                        respuesta.nombreFichero,
+                        null,null,null).then( () => {
+                            this.processCancel(true);
+                        }).catch( (err: Error) => {
+                            this.util.addErrorMessage(err);
+                            this.setShowWait(false);
+                            this.changeDetectorRef.markForCheck();
+                        }
+                    );
+                }
+                this.changeDetectorRef.markForCheck();
+            }).catch( (err: Error) => {
+                this.util.addErrorMessage(err);
+                this.setShowWait(false);
+                this.changeDetectorRef.markForCheck();
+            });
     }
 
     /**

@@ -11,6 +11,9 @@ import { StandardFunctions } from '../common/standardFunctions';
 import { LanguageMng } from '../common/languageMng';
 import { ConditionalNavigationMng } from '../common/conditionalNavigationMng';
 import { UserFunctions } from '../common/userFunctions';
+import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
+import { GestionCache } from '../common/gestionCache'
+
 @Component({
     selector: 'imes-solicitud-siu-tindicarcontratante2',
     templateUrl: './siu_tindicarcontratante2.component.html',
@@ -69,7 +72,8 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
+        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431957012480960Ser_86UIServ_1';
         this.className = ModelConstants.Solicitud.name;
@@ -123,6 +127,548 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
 
     public ngOnInit(): void {
         this.myngOnInit();
+    }
+
+    private buscarPersonaenCORE(): void {
+
+        // Si el usuario no puede ver los datos bÃ¡sicos de persona, no hacemos nada
+        if (!this.appGlobalInfo.getLoggedUserInfo().puedeVerDatosPersona()) {
+            return;
+        }
+
+        // Comprobamos que tengamos el tipo y el numero
+        const tipo = this.ptupuevcTipoIdentificacion.getSelectedInstances();
+        if (tipo && tipo.length === 1 && this.ptupuNumIdentificacion.value) {
+            this.limpiarCampos();
+            this.buscarPersonaenCOREAux(tipo[0].jsonOID);
+        }
+    }
+
+    private buscarPersonaenCOREAux(oidJSONTipoIdentificacion: string): void {
+
+        // Recuperamos los datos necesarios para tratar los datos
+        this.addQueryInstanceFromField(this.ptupuevcTipoIdentificacion, 'nit');
+        this.addQueryInstanceFromField(this.puthisSolicitud, 'NumRadicado,drvPermiteRechazados,AE_SOLICITUDES.PlanT.EsVoluntario');
+        this.notifyCallToTheBackEnd();
+        this.cacheDependencyRules.searchAll().then(() => {
+            this.notifyAnswerFromToTheBackEnd();
+            const varputhissolicitud = this.getFirstInstanceFromCache(this.puthisSolicitud);
+            const varTipoIdent = this.getFirstInstanceFromCache(this.ptupuevcTipoIdentificacion);
+            const numSol = varputhissolicitud.get('NumRadicado');
+            if (varTipoIdent.get('nit')) {
+                this.notifyCallToTheBackEnd();
+                this.bhServicesUtil.buscarPersonaJuridicaPorOidTipoIdent(oidJSONTipoIdentificacion, this.ptupuNumIdentificacion.value, numSol).then((respuesta: any) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    if (respuesta?.getOrganizationResponse?.entry &&
+                        "0" != respuesta?.getOrganizationResponse.total) {
+                        this.cargarPersonaJuridicaDesdeCORE(respuesta);
+                    } else {
+                        this.setShowWait(false);
+                        this.util.addErrorMessage('La persona no existe');
+                        this.limpiarCampos();
+                        this.changeDetectorRef.markForCheck();
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.setShowWait(false);
+                    this.util.addErrorMessage(err);
+                    this.changeDetectorRef.markForCheck();
+                }
+                );
+            } else {
+                this.notifyCallToTheBackEnd();
+                this.bhServicesUtil.buscarPersonaPorOidTipoIdent(oidJSONTipoIdentificacion, this.ptupuNumIdentificacion.value, numSol).then((datosPersona: any) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    if (datosPersona?.basicData) {
+                        this.cargarPersonaNaturalDesdeCORE(datosPersona);
+                    } else {
+                        this.setShowWait(false);
+                        this.util.addErrorMessage('La persona no existe');
+                        this.limpiarCampos();
+                        this.changeDetectorRef.markForCheck();
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.setShowWait(false);
+                    this.util.addErrorMessage(err);
+                    this.changeDetectorRef.markForCheck();
+                }
+                );
+            }
+        });
+    }
+
+    private limpiarCampos(): void {
+        this.ptupuPrimerNombre.clean();
+        this.ptupuSegundoNombre.clean();
+        this.ptupuPrimerApellido.clean();
+        this.ptupuSegundoApellido.clean();
+        this.ptupuFechaNacimiento.clean();
+        this.ptupuGenero.clean();
+        this.ptupuIndicadorExtranjero.value = false;
+        this.executeDependecyRulesptupuindicadorextranjero('SetValue', true);
+        this.ptupuTelefonoFijo.clean();
+        this.ptupuTelefonoCelular.clean();
+        this.ptupuCorreoElectronico.clean();
+        this.ptupuevcDepartamentoNac.clean();
+        this.ptupuevcMunicipioNac.cleanPreload();
+        this.ptupuevcMunicipioNac.clean();
+        this.ptupuevcEstadoCivil.clean();
+        this.ptupuDireccionCompleta.clean();
+        this.ptupuRural.clean();
+        this.ptupuevcMunicipio.cleanPreload();
+        this.ptupuevcMunicipio.clean();
+        this.ptupuevcDepartamento.clean();
+        this.ptupuatrRazonSocial.clean();
+        this.ptupDCDireccionCompleta.clean();
+        this.ptupDCDepartamento.clean();
+        this.ptupDCMunicipio.clean();
+        this.ptupDCMunicipio.cleanPreload();
+        this.ptupDCRural.clean();
+        this.ptupDCTelefonoFijo.clean();
+        this.ptupDCTelefonoCelular.clean();
+        this.ptReplicarDireccion.value = false;
+        this.ptupuCodigoCORE.clean();
+        this.executeDependecyRulesptupucodigocore('SetValue', true);
+        this.ptuTieneEPSSanitas.value = false
+        this.ptuRechazadoAfiliacion.value = false;
+        this.puTitularBeneficios.value = true;
+        this.ptuDiplomatico.value = false;
+        this.ptEstadoPersona.clean();
+        this.ptuDireccionesXClass.clean();
+        this.ptuDireccionesXClass.options = [];
+        this.executeDependecyRulesptupuevctipoidentificacion('SetValue', true);
+    }
+
+    private cargarPersonaJuridicaDesdeCORE(respuesta: any) {
+
+        this.limpiarCampos();
+
+        this.ptupuCodigoCORE.value = 0;
+
+        // Inhabilitamos los campos prque no se puede modificar a una persona juridica
+        this.ptupuatrRazonSocial.enabled = false;
+        this.ptupuCorreoElectronico.enabled = false;
+        this.ptupuDireccionCompleta.enabled = false;
+        this.ptupDCDireccionCompleta.enabled = false;
+        this.ptupuevcDepartamento.enabled = false;
+        this.ptupDCDepartamento.enabled = false;
+        this.ptupuevcMunicipio.enabled = false;
+        this.ptupDCMunicipio.enabled = false;
+        this.ptupuRural.enabled = false;
+        this.ptupuRural.value = false;
+        this.ptupDCRural.enabled = false;
+        this.ptupDCRural.value = false;
+        this.ptupuTelefonoFijo.enabled = false;
+        this.ptupuTelefonoCelular.enabled = false;
+        this.ptupDCTelefonoFijo.enabled = false;
+        this.ptupDCTelefonoCelular.enabled = false;
+        this.ptuDireccionesXClass.enabled = false;
+        this.ptReplicarDireccion.enabled = false;
+        this.ptReplicarDireccion.value = false;
+
+
+        const entry = respuesta.getOrganizationResponse.entry[0];
+        // No puede tener beneficios
+        this.puTitularBeneficios.value = false;
+
+        this.ptupuatrRazonSocial.value = entry.resource?.schema?.name;
+
+        // Correo electronico
+        this.ptupuCorreoElectronico.value = respuesta.email;
+        //this.ptupuCorreoElectronico.value =  BHServicesUtil.getValorElementoPorClave(entry.resource?.schema?.telecom, 'system', 'email', 'value');
+
+        // Direccion, de residencia y correspondencia
+        if (respuesta?.direccion) {
+            this.ptupuDireccionCompleta.value = respuesta?.direccion.line;
+            this.ptupDCDireccionCompleta.value = respuesta?.direccion.line;
+            // Tenemos los codigos legales de departamento y municipio
+            const codLegalDep = respuesta?.direccion.state;
+            const codLegalMun = respuesta?.direccion.city;
+            if (codLegalDep) {
+                this.notifyCallToTheBackEnd();
+                this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then((oidDep: string) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    // Asignamos el valor el argumento y precargamos los municipios
+                    this.ptupuevcDepartamento.setValue(JSON.parse(oidDep));
+                    this.ptupDCDepartamento.setValue(JSON.parse(oidDep));
+                    this.loadPreloadptupdcmunicipio();
+                    this.loadPreloadptupuevcmunicipio();
+
+                    if (codLegalMun) {
+                        // Buscamos el municipio por codigo legal
+                        this.notifyCallToTheBackEnd();
+                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then((oidMun: string) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.ptupuevcMunicipio.setValue(JSON.parse(oidMun));
+                            this.ptupDCMunicipio.setValue(JSON.parse(oidMun));
+                        }).catch((err: Error) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.util.addErrorMessage(err);
+                        });
+                    }
+                }).catch( (err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                });
+            }
+        }        
+
+        // Telefonos
+        this.ptupuTelefonoFijo.value = respuesta?.telefonoFijo;
+        //this.ptupuTelefonoCelular.value = respuesta?.telefonoCelular;
+
+        this.ptupDCTelefonoFijo.value = respuesta?.telefonoFijo;
+        //this.ptupDCTelefonoCelular.value = respuesta?.telefonoCelular;
+    }
+
+    private cargarPersonaNaturalDesdeCORE(datosPersona: any): void {
+
+        // Lista de promesas a las que tenemos que esperar para terminar
+        this.setShowWait(true);
+        this.limpiarCampos();
+
+        // Habilitamos los campos 
+        this.ptupuatrRazonSocial.enabled = true;
+        this.ptupuCorreoElectronico.enabled = true;
+        this.ptupuDireccionCompleta.enabled = true;
+        this.ptupDCDireccionCompleta.enabled = true;
+        this.ptupuevcDepartamento.enabled = true;
+        this.ptupDCDepartamento.enabled = true;
+        this.ptupuevcMunicipio.enabled = true;
+        this.ptupDCMunicipio.enabled = true;
+        this.ptupuRural.enabled = true;
+        this.ptupDCRural.enabled = true;
+        this.ptupuTelefonoFijo.enabled = true;
+        this.ptupuTelefonoCelular.enabled = true;
+        this.ptupDCTelefonoFijo.enabled = true;
+        this.ptupDCTelefonoCelular.enabled = true;
+        this.ptuDireccionesXClass.enabled = true;
+        this.ptReplicarDireccion.enabled = true;
+        
+
+        const varputhissolicitud = this.getFirstInstanceFromCache(this.puthisSolicitud);
+        const permiteRechazados = varputhissolicitud.get('drvPermiteRechazados');
+        const planVoluntario = varputhissolicitud.get('AE_SOLICITUDES.PlanT.EsVoluntario');
+        const numSol = varputhissolicitud.get('NumRadicado');
+
+        const esPersonaNatural = true;
+
+        // Codigo del CORE
+        this.ptupuCodigoCORE.value = datosPersona.basicData.id;
+        this.executeDependecyRulesptupucodigocore('SetValue', true);
+
+        // Rechazado Afiliacion
+        this.ptuRechazadoAfiliacion.value = datosPersona?.rechazadoAfiliacion;
+
+        // Tiene EPS Sanitas
+        this.gestionCache.getCodigoLegalTipoIdentificacion(this.ptupuevcTipoIdentificacion.getSelectedInstances()[0].jsonOID).then ((codLegal: string) => {
+            this.notifyCallToTheBackEnd();
+            this.bhServicesUtil.tieneEPSSanitas(codLegal, this.ptupuNumIdentificacion.value, numSol).then ( (tieneEPS: boolean) => {
+                this.ptuTieneEPSSanitas.setValue(tieneEPS);
+                this.notifyAnswerFromToTheBackEnd();
+                this.changeDetectorRef.markForCheck();
+            }).catch( (err: Error) => {
+                this.notifyAnswerFromToTheBackEnd();
+                this.util.addErrorMessage(err);
+                this.changeDetectorRef.markForCheck();
+            });
+    
+        }).catch( (err: Error) => {
+            this.util.addErrorMessage(err);
+        });
+
+        // Nombre
+        this.ptupuPrimerNombre.value = datosPersona?.basicData?.name?.name?.firstName;
+        this.ptupuSegundoNombre.value = datosPersona?.basicData?.name?.name?.secondName;
+        this.ptupuPrimerApellido.value = datosPersona?.basicData?.name?.name?.firstFamily;
+        this.ptupuSegundoApellido.value = datosPersona?.basicData?.name?.name?.secondFamily;
+        this.ptupuFechaNacimiento.value = this.util.getDate(datosPersona?.basicData?.birthDate);
+        this.ptupuGenero.value = datosPersona?.basicData?.gender;
+
+        if (datosPersona?.basicData?.foreign) {
+            this.ptupuIndicadorExtranjero.value = true;
+        } else {
+            this.ptupuIndicadorExtranjero.value = false;
+        }
+        this.executeDependecyRulesptupuindicadorextranjero('SetValue', true);
+
+        this.ptupuTelefonoFijo.value = BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom);
+        this.ptupuTelefonoCelular.value = BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom);
+
+        this.ptupuCorreoElectronico.value = BHServicesUtil.getCorreoElectronico(datosPersona?.contact?.telecom);
+
+        this.ptupuevcEstadoCivil.setValue(datosPersona?.basicData?.maritalStatus?.code ?
+            this.util.oidBuilder.buildOidEstadoCivil(datosPersona?.basicData?.maritalStatus?.code) : null);
+
+        // Ciudad de nacimiento
+        if (datosPersona?.basicData?.extension && datosPersona?.basicData?.extension.length > 0) {
+            const valueAddress = datosPersona?.basicData?.extension[0].valueAddress;
+            if (valueAddress) {
+                // Tenemos los codigos legales de departamento y municipio
+                const codLegalDep = valueAddress?.state?.code;
+                const codLegalMun = valueAddress?.city?.code;
+                if (codLegalDep) {
+                    this.notifyCallToTheBackEnd();
+                    this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then((oidDep: string) => {
+                        this.notifyAnswerFromToTheBackEnd();
+                        // Asignamos el valor el argumento y precargamos los municipios
+                        this.ptupuevcDepartamentoNac.setValue(JSON.parse(oidDep));
+                        this.loadPreloadptupuevcmunicipionac();
+                        if (codLegalMun) {
+                            // Buscamos el municipio por codigo legal
+                            this.notifyCallToTheBackEnd();
+                            this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then((oidMun: string) => {
+                                this.notifyAnswerFromToTheBackEnd();
+                                this.ptupuevcMunicipioNac.setValue(JSON.parse(oidMun));
+                            }).catch((err: Error) => {
+                                this.notifyAnswerFromToTheBackEnd();
+                                this.util.addErrorMessage(err);
+                            });
+                        }
+                    }).catch( (err: Error) => {
+                        this.notifyAnswerFromToTheBackEnd();
+                    });
+                }
+            }
+        }
+
+        // Direccion residencial
+        const direccionResidencia = BHServicesUtil.getElemento(datosPersona?.contact?.address, 'use', 'RESIDENCIAL');
+        if (direccionResidencia) {
+            this.ptupuDireccionCompleta.value = direccionResidencia.text;
+            this.ptupuRural.value = false;
+            // Tenemos los codigos legales de departamento y municipio
+            const codLegalDep = direccionResidencia?.state?.code;
+            const codLegalMun = direccionResidencia.city?.code;
+            const codPais = direccionResidencia.country?.code;
+
+            if (codLegalDep) {
+                this.notifyCallToTheBackEnd();
+                this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then((oidDep: string) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    // Asignamos el valor el argumento y precargamos los municipios
+                    this.ptupuevcDepartamento.setValue(JSON.parse(oidDep));
+                    this.loadPreloadptupuevcmunicipio();
+                    if (codLegalMun) {
+                        // Buscamos el municipio por codigo legal
+                        this.notifyCallToTheBackEnd();
+                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then((oidMun: string) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.ptupuevcMunicipio.setValue(JSON.parse(oidMun));
+                        }).catch((err: Error) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.util.addErrorMessage(err);
+                        });
+                    }
+                }).catch( (err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                });
+            }
+            // Pais
+            if (codPais) {
+                this.notifyCallToTheBackEnd();
+                this.gestionCache.existePais(codPais).then((existePais: boolean) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    // Asignamos el valor el argumento
+                    if (existePais) {
+                        this.ptupuPais.setValue(this.util.oidBuilder.buildOidPais(codPais));
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.util.addErrorMessage(err);
+                });
+            }
+        }
+
+        // Direccion correspondencia
+        const direccionCorrespondencia = BHServicesUtil.getElemento(datosPersona?.contact?.address, 'use', 'CORRESPONDENCIA');
+        if (direccionCorrespondencia) {
+            this.ptupDCDireccionCompleta.value = direccionCorrespondencia.text;
+            this.ptupDCRural.value = false;
+            // Tenemos los codigos legales de departamento y municipio
+            const codLegalDep = direccionCorrespondencia.state?.code;
+            const codLegalMun = direccionCorrespondencia.city?.code;
+            const codPais = direccionCorrespondencia.country?.code;
+
+            if (codLegalDep) {
+                this.notifyCallToTheBackEnd();
+                this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then((oidDep: string) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    // Asignamos el valor el argumento y precargamos los municipios
+                    this.ptupDCDepartamento.setValue(JSON.parse(oidDep));
+                    this.loadPreloadptupdcmunicipio();
+                    if (codLegalMun) {
+                        // Buscamos el municipio por codigo legal
+                        this.notifyCallToTheBackEnd();
+                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then((oidMun: string) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.ptupDCMunicipio.setValue(JSON.parse(oidMun));
+                        }).catch((err: Error) => {
+                            this.notifyAnswerFromToTheBackEnd();
+                            this.util.addErrorMessage(err);
+                        });
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.util.addErrorMessage(err);
+                });
+            }
+            // Pais
+            if (codPais) {
+                this.notifyCallToTheBackEnd();
+                this.gestionCache.existePais(codPais).then((existePais: boolean) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    // Asignamos el valor el argumento
+                    if (existePais) {
+                        this.pDCPais.setValue(this.util.oidBuilder.buildOidPais(codPais));
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.util.addErrorMessage(err);
+                });
+            }
+        }
+
+        this.ptupDCTelefonoFijo.value = BHServicesUtil.getTelefonoFijoCorrespondencia(datosPersona?.contact?.telecom);
+
+        this.ptupDCTelefonoCelular.value = BHServicesUtil.getTelefonoCelularCorrespondencia(datosPersona?.contact?.telecom);
+
+
+        // Estado de la persona
+        if (datosPersona.estadoPersona) {
+            this.ptEstadoPersona.setValue(this.util.oidBuilder.buildOidEstadoPersona(datosPersona.estadoPersona));
+        }
+
+        // Titular con beneficios
+        // Condiciones, que sea persona natural y no esta rechazado en Afiliacion
+        if (esPersonaNatural && (permiteRechazados || !this.ptuRechazadoAfiliacion.value)) {
+            this.puTitularBeneficios.value = true;
+            this.puTitularBeneficios.enabled = true;
+        } else {
+            this.puTitularBeneficios.value = false;
+            this.puTitularBeneficios.enabled = false;
+        }
+
+        // Cargamos todas las direcciones recibidas en el combo
+        // Si el usuario no puede ver los datos basicos de persona, no hacemos nada
+        if (this.appGlobalInfo.getLoggedUserInfo().userCache?.modDBasicosPersona && datosPersona?.contact?.address) {
+            let i = 1;
+            for (const dir of datosPersona.contact.address) {
+                const datoDireccion = {
+                    idUnico: i,
+                    address: dir,
+                    telefonoFijo: BHServicesUtil.getTelefonoFijoResidencia(datosPersona?.contact?.telecom),
+                    telefonoCelular: BHServicesUtil.getTelefonoCelularResidencia(datosPersona?.contact?.telecom)
+                }
+                this.ptuDireccionesXClass.options.push({ key: datoDireccion, value: dir.text })
+                i++;
+            }
+        }
+
+
+        // Si la persona existe y el plan de la solicitud es voluntario, buscamos los contratos existentes
+        // Planes Voluntarios - Req. 5: Validacion de afiliado - Referencia: HU-AEEPS-04
+        if (this.puTitularBeneficios.value && planVoluntario) {
+            this.notifyCallToTheBackEnd();
+            this.bhServicesUtil.consultarBeneficiario(
+                BHServicesUtil.getValorElementoPorClave(datosPersona.basicData.identifier, 'type', 'TIPO_IDENTIFICACION', 'value'),
+                BHServicesUtil.getValorElementoPorClave(datosPersona.basicData.identifier, 'type', 'NUMERO_IDENTIFICACION', 'value'),
+                numSol).then((contratos: string[]) => {
+                    // Recorremos los contratos encontrados
+                    this.notifyAnswerFromToTheBackEnd();
+                    if (contratos && contratos.length > 0) {
+                        // Recorremos los contratos 
+                        let mensaje = '';
+
+                        mensaje += this.ptupuPrimerNombre.value ? this.ptupuPrimerNombre.value : '';
+                        mensaje += this.ptupuSegundoNombre.value ? " " + this.ptupuSegundoNombre.value : '';
+                        mensaje += this.ptupuPrimerApellido.value ? " " + this.ptupuPrimerApellido.value : '';
+                        mensaje += this.ptupuSegundoApellido.value ? " " + this.ptupuSegundoApellido.value : '';
+
+                        contratos.unshift(mensaje);
+                        this.util.addErrorMessageList(contratos);
+                    }
+                }).catch((err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.util.addErrorMessage(err);
+                });
+        }
+    }
+
+    private asignarDireccionSeleccionada(): void {
+        // Asignamos la direccion seleccionada en el combo
+        if (!this.ptuDireccionesXClass.value) {
+            return;
+        }
+
+        const dirSel = this.ptuDireccionesXClass.value;
+        this.ptupuDireccionCompleta.value = dirSel.address.text;
+        this.ptupuTelefonoFijo.value = dirSel.telefonoFijo;
+        this.ptupuTelefonoCelular.value = dirSel.telefonoCelular;
+        const codLegalDep = dirSel.address.state?.code;
+        const codLegalMun = dirSel.address.city?.code;
+        const codPais = dirSel.address.country?.code;
+
+        if (codLegalDep) {
+            this.setShowWait(true);
+            this.gestionCache.getOidDepartamentoPorCodigoLegal(codLegalDep).then((oidDep: string) => {
+                this.setShowWait(false);
+                if (oidDep) {
+                    // Si no es el mismo departamento
+                    const depSeleccionado = this.ptupuevcDepartamento.getSelectedInstances() ? this.ptupuevcDepartamento.getSelectedInstances()[0] : undefined;
+                    if (depSeleccionado?.jsonOID != oidDep) {
+                        // Asignamos el valor el argumento y precargamos los municipios
+                        this.ptupuevcDepartamento.setValue(JSON.parse(oidDep));
+                        this.loadPreloadptupuevcmunicipio();
+                    } else {
+
+                    }
+                    if (codLegalMun) {
+                        const munSeleccionado = this.ptupuevcMunicipio.getSelectedInstances() ? this.ptupuevcMunicipio.getSelectedInstances()[0] : undefined;
+                        // Buscamos el municipio por codigo legal
+                        this.setShowWait(true);
+                        this.gestionCache.getOidMunicipioPorCodigoLegal(codLegalMun).then((oidMun: string) => {
+                            this.setShowWait(false);
+                            if (munSeleccionado?.jsonOID != oidMun) {
+                                this.ptupuevcMunicipio.setValue(JSON.parse(oidMun));
+                            }
+                        }).catch((err: Error) => {
+                            this.setShowWait(false);
+                            this.util.addErrorMessage(err);
+                        });
+
+                    } else {
+                        this.ptupuevcMunicipio.clean();
+                    }
+
+                }
+            }).catch((err: Error) => {
+                this.setShowWait(false);
+                this.util.addErrorMessage(err);
+            });
+        } else {
+            this.ptupuevcDepartamento.clean();
+            this.loadPreloadptupuevcmunicipio();
+        }
+        // Pais
+        if (codPais) {
+            this.gestionCache.existePais(codPais).then((existePais: boolean) => {
+                // Asignamos el valor el argumento
+                if (existePais) {
+                    this.ptupuPais.setValue(this.util.oidBuilder.buildOidPais(codPais));
+                }
+            }).catch((err: Error) => {
+                this.setShowWait(false);
+                this.util.addErrorMessage(err);
+            })
+        } else {
+            this.ptupuPais.clean();
+        }
+    }
+
+    public override saveChanges(): void {
+        this.ptuDireccionesXClass.clean();
+        super.saveChanges();
     }
 
     /**
@@ -485,8 +1031,8 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
             'Direcciones');
         this.ptuDireccionesXClass.mandatory = false;
         this.ptuDireccionesXClass.dataType = Field.dtString;
-        this.ptuDireccionesXClass.options = DefinedSelections.DS_GENERO;
-        this.ptuDireccionesXClass.maxLength = 1;
+        // this.ptuDireccionesXClass.options = DefinedSelections.DS_GENERO;
+        // this.ptuDireccionesXClass.maxLength = 1;
         this.ptuDireccionesXClass.assignCSS();
         this.fields.push(this.ptuDireccionesXClass);
 
@@ -929,6 +1475,8 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
             // pt_Diplomatico.SetActive( FALSE )
             this.ptuDiplomatico.enabled = false;
         }
+        this.ptuDireccionesXClass.options = [];
+        this.ptuDireccionesXClass.clean();
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();
     }
@@ -1377,6 +1925,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
         // Rule 1
         if ('SetValue' === event && !internal) {
             this.executeDependecyRules1ptupuNumIdentificacion();
+            this.buscarPersonaenCORE();
         }
         // Rule 2
         if ('SetValue' === event) {
@@ -1582,6 +2131,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
         // Rule 1
         if ('SetValue' === event && !internal) {
             this.executeDependecyRules1ptupuevcTipoIdentificacion();
+            this.buscarPersonaenCORE();
         }
         // Rule 2
         if ('SetValue' === event) {
@@ -2163,7 +2713,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
         // v <> NULL
         if (!this.util.isNull(this.ptuDireccionesXClass.value)) {
             // pt_p_DireccionCompleta.SetValue( "" )
-            this.ptupuDireccionCompleta.setValue('');
+            this.asignarDireccionSeleccionada();
         }
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();
@@ -2432,16 +2982,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
 
         switch (groupId) {
             case '5':
-                isVisible = this.ptupuPrimerNombre.visible ||
-                this.ptupuSegundoNombre.visible ||
-                this.ptupuPrimerApellido.visible ||
-                this.ptupuSegundoApellido.visible ||
-                this.ptupuFechaNacimiento.visible ||
-                this.ptupuGenero.visible ||
-                this.ptupuIndicadorExtranjero.visible ||
-                this.ptupuevcDepartamentoNac.visible ||
-                this.ptupuevcMunicipioNac.visible ||
-                this.ptupuevcEstadoCivil.visible;
+                isVisible = this.ptupuPrimerNombre.visible ;
                 break;
             case '7':
                 isVisible = this.ptupuatrRazonSocial.visible;

@@ -92,7 +92,16 @@ export class GSSIUuOGENERARSOLICITUD2uOutComponent  extends AbstractIU implement
         this.changeDetectorRef.markForCheck();
     }
 
-    /**
+    public override processCancel(lastExecutionSuccess?: boolean): void {
+        if (this.exchangeInfo?.comeBackContext?.exchangeInfo?.targetIUName?.toLowerCase().startsWith('piu') ) {
+            super.processCancel(lastExecutionSuccess);
+        } else {
+            this.util.navigateToMain();
+        }
+    }
+
+
+     /**
      * Initialize the scenario using the response information
      */
     public initializeFromResponse(): void {

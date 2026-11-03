@@ -242,6 +242,15 @@ export class LenseSearchComponent extends AbstractLenseComponent {
         return this.field.getSelectedInstances().length > 1;
     }
 
+    /**
+     * Manages the key Up event
+     */
+    public onKeyUp(event: KeyboardEvent): void {
+        if (this.field && this.field.text) {
+            this.field.text = this.field.text.toUpperCase();
+        }
+    }    
+
     public resultListVisible(): boolean {
         if (this.field?.searchResults && this.field?.searchResults.length > 0) {
             if (this.overlayPanel && this.lastEvent) {

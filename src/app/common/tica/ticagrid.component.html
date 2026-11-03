@@ -50,10 +50,7 @@
                         <ng-container *ngIf="col.type === 3">
                             <span>{{rowData[col.field] | date: col.mask}}</span>
                         </ng-container>
-                        <ng-container *ngIf="col.type === 4">
-                            <img [src]="util.getSafeUrl('data:image/jpg;base64,' + rowData[col.field])"
-                                alt="image data" />
-                        </ng-container>
+
                     </td>
                 </ng-container>
             </tr>

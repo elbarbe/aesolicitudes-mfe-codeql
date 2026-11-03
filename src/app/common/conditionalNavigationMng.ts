@@ -311,8 +311,7 @@ export class ConditionalNavigationMng {
             }
             // p_thisSolicitud.Ae_solicitudes.PlanT.EsVoluntario = false
             if (!conditionFulfilled &&
-                this.util.valueEquals(this.util.getBool(varputhissolicitud.get('Ae_solicitudes.PlanT.EsVoluntario')), false) &&
-                this.appGlobalInfo.getLoggedUserInfo().isAgentOneOf(['Admin', 'SuperAdmin', 'Asesor', 'Afiliaciones'])) {
+                this.util.valueEquals(this.util.getBool(varputhissolicitud.get('Ae_solicitudes.PlanT.EsVoluntario')), false) ) {
                 conditionFulfilled = true;
                 exchInfo = this.util.createExchangeInfoFromCondNavigation(ModelConstants.Globalservices.name,
                     ModelConstants.Globalservices.siuuogenerarsolicitud2, previousContext, comeBackContext);

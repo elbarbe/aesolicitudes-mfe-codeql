@@ -20,7 +20,7 @@ export class InputStringComponent {
     /** Number maximum of rows for a text area in small screens */
     static readonly maxNumberRowsTextAreaSmallScreen = 2;
     /** Ratio overflow */
-    static readonly ratioOverflow = 1.5;
+    static readonly ratioOverflow = 1000;
     /** Editor number of rows */
     public numRows = 1;
     /** Use popup editor */
@@ -129,6 +129,16 @@ export class InputStringComponent {
     public isTextArea(): boolean {
         return this.intField.dataType === Field.dtText || this.numRows > 1;
     }
+
+    /**
+     * Manages the key down event
+     */
+    public onKeyUp(event: KeyboardEvent): void {
+        if (this.intField && (this.intField.dataType === Field.dtString || this.intField.dataType === Field.dtText) &&
+            this.intField.value) {
+            this.intField.value = this.intField.value.toUpperCase();
+        }
+    }    
 }
 
 /**
@@ -268,6 +278,19 @@ export class InputDateComponent extends InputStringComponent {
      */
     public onSelect(): void {
         if (this.field){
+
+            // Comprobacion: Solo el dia 1 del mes
+            if (this.field.value && this.field.dataType === 'date' && this.field.editorCSSClasses.includes('soloDiaUno')) {
+                try {
+                    const dateType = new Date(this.field.value);
+                    if (dateType.getDate() !== 1) {
+                        alert('Fecha no vÃ¡lida');
+                        this.field.value = null;
+                        return;
+                    }
+                } catch (e) {
+                }
+            }
             if (!this.showSeconds && this.field.value) {
                 this.removeSeconds();
             }
@@ -452,7 +475,7 @@ export class InputBlobComponent {
      */
     protected setAllowedExtensions(): void {
         if (this.intField.fileAllowedExtensions === '') {
-            this.intField.fileAllowedExtensions = '.doc,.docx,.pdf,.xls,.xlsx,.txt,.jpg,.jpeg,.bmp,.gif,.png';
+            this.intField.fileAllowedExtensions = '.pdf,.tif,.jpg,.bmp';
         }
     }
 

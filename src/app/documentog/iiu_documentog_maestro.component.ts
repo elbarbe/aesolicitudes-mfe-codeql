@@ -14,6 +14,9 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements IIU IIU_DocumentoG_Maestro of DocumentoG »
  */
+import { DocumentoGServices } from './documentog.services';
+import { BHGestorAtomicUtil } from '../bhcallutils/bhgestoratomicutil';
+
 export class DocumentoGIIUuDocumentoGuMaestroComponent extends AbstractIIU {
 
     /** Display Set elements */
@@ -43,6 +46,7 @@ export class DocumentoGIIUuDocumentoGuMaestroComponent extends AbstractIIU {
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
+        private gestorUtil: BHGestorAtomicUtil,
         public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1434446200832109UIInst_1';
@@ -69,6 +73,44 @@ export class DocumentoGIIUuDocumentoGuMaestroComponent extends AbstractIIU {
         this.dseNumDescargas = new Field(this.langMng);
     }
 
+    public override doAction(actionId: number): void {
+
+        const action = this.getActionById(actionId);
+        if (action.targetClass === ModelConstants.Documentog.name &&
+            action.targetUI === ModelConstants.Documentog.siuuprevisualizarato) {
+                // Llamamos al servicio
+            const docSrv = new DocumentoGServices(this.appGlobalInfo, this.util);
+            this.setShowWait(true);
+            docSrv.previsualizarATO(this.getSelectedOids()[0]).then( ( respuesta: {
+                oatoken: string,
+                oaurldescarga: string,
+                oanumsolicitud: string
+            }) => {
+                if (respuesta && respuesta.oaurldescarga && respuesta.oatoken) {
+                    this.gestorUtil.descargarArchivo(respuesta.oatoken, respuesta.oaurldescarga, respuesta.oanumsolicitud).then( () => {
+                        this.setShowWait(false);
+                        this.changeDetectorRef.markForCheck();
+                    }).catch( (err: Error) => {
+                        this.setShowWait(false);
+                        this.util.addErrorMessage(err);
+                        this.changeDetectorRef.markForCheck();
+                    });
+                } else {
+                    this.setShowWait(false);
+                    this.util.addErrorMessage(this.gestorUtil.MSG_ERROR_GEN);
+                    this.changeDetectorRef.markForCheck();
+                }
+                this.changeDetectorRef.markForCheck();
+            }).catch( (err: Error) => {
+                this.setShowWait(false);
+                this.util.addErrorMessage(err);
+                this.changeDetectorRef.markForCheck();
+            });
+        } else {
+            super.doAction(actionId);
+        }        
+    }
+    
     /**
      * Initialize the display set elements
      */

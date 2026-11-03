@@ -11,6 +11,8 @@ import { StandardFunctions } from '../common/standardFunctions';
 import { LanguageMng } from '../common/languageMng';
 import { ConditionalNavigationMng } from '../common/conditionalNavigationMng';
 import { UserFunctions } from '../common/userFunctions';
+import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
+import { GestionCache } from '../common/gestionCache';
 @Component({
     selector: 'imes-ae-solicitudes-siu-tinclusionsc',
     templateUrl: './siu_tinclusionsc.component.html',
@@ -42,7 +44,8 @@ export class AeusolicitudesSIUuTINCLUSIONSCComponent extends AbstractServiceIU i
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
+        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'Clas_1431956094976663Ser_13UIServ_1';
         this.className = ModelConstants.Aeusolicitudes.name;
@@ -920,9 +923,9 @@ export class AeusolicitudesSIUuTINCLUSIONSCComponent extends AbstractServiceIU i
     private executeDependecyRules2ptupuatrNumContratoInclusion(): void {
         this.cacheDependencyRules.counter++;
         this.addQueryInstanceFromField(this.ptupuagrProducto,
-                'Producto');
+                'Producto,CodigoLegal');
         this.addQueryInstanceFromField(this.ptupuagrPlan,
-                'Plan');
+                'Plan,CodigoLegal');
         this.notifyCallToTheBackEnd();
         this.cacheDependencyRules.searchAll().then(() => {
             this.notifyAnswerFromToTheBackEnd();
@@ -944,10 +947,40 @@ export class AeusolicitudesSIUuTINCLUSIONSCComponent extends AbstractServiceIU i
         const varptupuagrproducto = this.getFirstInstanceFromCache(this.ptupuagrProducto);
         const varptupuagrplan = this.getFirstInstanceFromCache(this.ptupuagrPlan);
         // v <> NULL AND pt_p_agrProducto <> NULL AND pt_p_agrPlan <> NULL
+        if (this.ptupuatrNumContratoInclusion.value) {
+            this.ptupuatrNumContratoInclusion.value = this.stdFun.strTrim(this.ptupuatrNumContratoInclusion.value);
+        }
         if (varptupuagrproducto && varptupuagrplan && !this.util.isNull(this.ptupuatrNumContratoInclusion.value) &&
             !this.util.isNull(varptupuagrproducto) && !this.util.isNull(varptupuagrplan)) {
             // pt_p_atrNumFamilia.SetValue( "1" )
-            this.ptupuatrNumFamilia.setValue('1');
+            // this.ptupuatrNumFamilia.setValue('1');
+            
+            this.notifyCallToTheBackEnd();
+            this.bhServicesUtil.consultarContrato(varptupuagrproducto.get('CodigoLegal'), varptupuagrplan.get('CodigoLegal'),
+                this.ptupuatrNumContratoInclusion.value, '').then( (coverResponse: any) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    if (coverResponse && (coverResponse?.coverFamilyResponse || coverResponse?.coverResponse)) {
+                        // Si es familiar incializamos el numero de familia y bloqueamos
+                        if (coverResponse?.coverFamilyResponse) {
+                            this.ptupuatrNumFamilia.value = '1';
+                            this.ptupuatrNumFamilia.enabled = false;
+                        } else {
+                            this.ptupuatrNumFamilia.value = null;
+                            this.ptupuatrNumFamilia.enabled = true;
+                        }
+                    } else {
+                        this.util.addErrorMessage('El contrato indicado no existe');
+                    }
+
+                    this.changeDetectorRef.markForCheck();
+                }).catch( (err: Error) => {
+                    this.notifyAnswerFromToTheBackEnd();
+                    this.ptupuatrNumFamilia.value = '';
+                    this.ptupuatrNumFamilia.enabled = true;
+                    this.util.addErrorMessage('El contrato indicado no existe');
+                    this.changeDetectorRef.markForCheck();
+                })
+            
         }
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();

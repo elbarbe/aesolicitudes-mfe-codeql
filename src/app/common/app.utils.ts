@@ -16,6 +16,8 @@ import { environment } from 'src/environments/environment';
 /**
  * « Utility class for common functionality »
  */
+import { ModelConstants } from './model.constants';
+
 @Injectable({providedIn: 'root'})
 export class Util {
 
@@ -838,6 +840,15 @@ export class Util {
      * @param fileName File name
      */
     public openInNewWindow(fileDataBase64: string, fileName: string): void {
+        // Tratamos el caso especial de generacion de reporte
+        if (fileName === '...GET...') {
+            let url = this.appGlobalInfo.APPCONSTANTS.BASE_URL;
+            url += '/api/GlobalServicesApi/ShowReporte';
+            // En el archivo ha llega el querystring a emplear
+            url += window.atob(fileDataBase64);
+            window.open(url, '_blank');
+            return;
+        }
         if (fileDataBase64) {
             // Set MIME type using the file extension
             let options = { type: 'application/octet-stream' };
@@ -1621,8 +1632,100 @@ export class Util {
         if (this.appGlobalInfo.APPCONSTANTS.BASE_URL === '') {
             return this.waitForBaseUrl(url, data, 1, responseAsText);
         } else {
-            return this.callHttpPostAux(url, data, responseAsText);
+            return new Promise<any>((resolve, reject) => {
+                this.callHttpPostAux(url, data, responseAsText).then( (response: any) => {
+                    resolve(response);
+                }).catch( (err: ErrorInformation) => {
+                    // Si el error es por timeout, reintentamos tras actualizar el token
+                    if (err.code === '123' && err.message === '123') {
+                        this.retryCall(url, data, responseAsText).then( (response:any) => {
+                            resolve(response);
+                        }).catch( (err:ErrorInformation) => {
+                            reject(err);
+                        });
+                    } else {
+                        reject(err);
+                    }
+                });
+            });
         }
+    }
+
+
+    private retryCall(url: string, data: any, responseAsText: boolean): Promise<any> {
+        // Mandamos a comprobar la cuenta del usuario y reintentamos
+        this.appGlobalInfo.setUserUnauthorized();
+        this.appGlobalInfo.checkUserAccount();
+        return this.retryCallAux(url, data, responseAsText, new Date(), 0);
+    }
+
+    private retryCallAux(url: string, data: any, responseAsText: boolean, inicio: Date, numIntentos: number): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            // Si hemos superado el numero de reintentos, damos un error
+            if (numIntentos >= 3) {
+                reject(new ErrorInformation(false, '', 'Su sesion ha caducado, espere unos instantes y vuelva a intentarlo', '',[] ));
+            } else  if (this.appGlobalInfo.getLoggedUserInfo().lastActivityTimestamp > inicio) {
+                // Si ha habido actividad en la informacion del usuario posterior al inicio, repetimos la llamada
+                this.callHttpPostAux(url, data, responseAsText).then( (response: any) => {
+                    resolve(response);
+                }).catch( (err: ErrorInformation) => {
+                    reject(err);
+                });
+            } else {
+                // Esperamos 3 segundos y volvemos a intentarlo incrementando el contador de intentos
+                setTimeout( () => {
+                    this.retryCallAux(url, data, responseAsText, inicio, numIntentos + 1).then( (response: any) => {
+                        resolve(response);
+                    }).catch( (err: ErrorInformation) => {
+                        reject(err);
+                    });
+                }, 3000);
+            }
+        });
+    }
+
+    /**
+     * Devuelve el código legal del tipo de identificación recibido
+     * @param oidTipoIdent 
+     */
+    public getCodigoLegalTipoIdentificacion(oidTipoIdent: string): Promise<string> {
+        
+        // Si tenemos los datos en la cache
+        const tiposIdentString = sessionStorage.getItem('cacheTI');
+        if (tiposIdentString) {
+            return this.getCodigoLegalTipoIdentificacionAux(oidTipoIdent);
+        } else {
+            // Los buscamos y guardamos en cache
+            const query = this.getQueryRequest('nombrecorto', [], '',999);
+            return new Promise<string>( (resolve, reject) => {
+                this.callQuery(ModelConstants.Tipoidentificacion.name, query).then( (resp: QueryResponse) => {
+                    const lista = [];
+                    for (const dato of resp.results) {
+                        lista.push({oid: dato.oid, valor: dato.nombrecorto});
+                    }
+                    // Lo guardamos en la sessionstorage
+                    sessionStorage.setItem('cacheTI', JSON.stringify(lista));
+                    return this.getCodigoLegalTipoIdentificacionAux(oidTipoIdent);
+                }).catch( (err: Error) => {
+                    reject(err);
+                })
+            });
+        }
+    }
+    public getCodigoLegalTipoIdentificacionAux(oidTipoIdent: string): Promise<string> {
+        
+        // Ya debemos tener los datos en la sessionStorage
+        const tiposIdentString = sessionStorage.getItem('cacheTI');
+        if (tiposIdentString) {
+            const tipos = JSON.parse(tiposIdentString);
+            const ele = tipos.find((tipo: any) => tipo.oid === oidTipoIdent);
+            if (ele) {
+                return Promise.resolve(ele.valor);    
+            } else {
+                return Promise.reject(new Error('Tipo identificacion no encontrado. ' + oidTipoIdent));
+            }
+        } 
+        return Promise.reject(new Error('Tipos de identificacion no cargados'));
     }
 
     /**
@@ -1688,7 +1791,28 @@ export class Util {
                         if (res.body && res.body.resultCode === '666') {
                             this.navigateToWrongVersionPage();
                         } else {
-                            resolve(res.body);
+                            if (res.body && res.body.resultCode === '777') {
+                                // Sesion abierta en otro dispositivo
+                                this.confirmationService.confirm({
+                                    key: 'appMainConfirmDialog',
+                                    message: 'Se ha detectado un inicio de sesión en otro dispositivo. Esta sesión queda cancelada',
+                                    header: 'Aviso',
+                                    icon: 'pi pi-info-circle',
+                                    acceptLabel: 'Ok',
+                                    rejectVisible: false,
+                                    accept: () => {
+                                        this.appGlobalInfo.setLogOut();
+                                        reject( new ErrorInformation(false, '', '','', []) );
+                                    },
+                                    reject: (type: number) => {
+                                        this.appGlobalInfo.setLogOut();
+                                        reject( new ErrorInformation(false, '', '','', []) );
+                                    }
+                                });
+                    
+                            } else {
+                                resolve(res.body);
+                            }
                         }
                     },
                     error: (msg: any) => {
@@ -1696,11 +1820,15 @@ export class Util {
                         const endTime = new Date();
                         const elapsedTime = endTime.getTime() - startTime.getTime();
                         this.saveLogInfo(startTime, endTime, url, 'POST', data, msg);
-                        if (msg.status === 401) {
-                            reject (new ErrorInformation(false, 'app_LOGINERROR', this.langMng.translateText('app_LOGINERROR',''), 'app_LOGINERROR', []));
-                        } else if (msg.status === 408) {
-                            this.appGlobalInfo.setUserUnauthorized();
-                            this.navigateToLogin(undefined);
+                        if (msg.status === 401 ||msg.status === 408) {
+                            // this.appGlobalInfo.setUserUnauthorized();
+                            // this.appGlobalInfo.checkUserAccount();
+                            const errorInfo = new RequestError(msg);
+                            errorInfo.external = false;
+                            errorInfo.code = '123';
+                            errorInfo.message = '123';
+                            reject( errorInfo);
+                            // this.navigateToLogin(undefined);
                         } else {
                             const errorInfo = new RequestError(msg);
                             if (msg.status === 0 && elapsedTime > this.appGlobalInfo.timeoutCET) {
@@ -1709,6 +1837,7 @@ export class Util {
                                 errorInfo.messageParts.push(startTime.toLocaleString());
                             } else {
                                 errorInfo.messageId = 'app_BACKENDUNKNOWNERROR';
+                                errorInfo.message = this.langMng.translateError(errorInfo);
                             }
                             reject(errorInfo);
                         }

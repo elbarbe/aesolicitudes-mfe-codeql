@@ -15,6 +15,12 @@ import { UserFunctions } from '../common/userFunctions';
 /**
  * « Implements global SIU SIU_TGSELECCONTRATOASOCTIT »
  */
+import { BHServicesUtil } from '../bhcallutils/bhservicesutil';
+import { GestionCache } from '../common/gestionCache';
+import { formatDate } from '@angular/common';
+import { GlobalServicesServices } from './globalservices.services';
+import { ErrorInformation } from '../common/answerRequestInformation';
+
 @Component({
     selector: 'imes-gs-siu-tgseleccontratoasoctit',
     templateUrl: './siu_tgseleccontratoasoctit.component.html',
@@ -42,7 +48,8 @@ export class GSSIUuTGSELECCONTRATOASOCTITComponent extends AbstractServiceIU imp
     constructor(
         public override appGlobalInfo: AppGlobalInfo, public override util: Util, public override changeDetectorRef: ChangeDetectorRef,
         public langMng: LanguageMng, public stdFun: StandardFunctions,
-        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions) {
+        public override condNavMng: ConditionalNavigationMng, public usrFunc: UserFunctions,
+        private bhServicesUtil: BHServicesUtil, private gestionCache: GestionCache) {
         super(appGlobalInfo, util, changeDetectorRef, condNavMng);
         this.idXML = 'IGl_1433934757888116UIServ_1';
         this.className = ModelConstants.Globalservices.name;
@@ -62,6 +69,87 @@ export class GSSIUuTGSELECCONTRATOASOCTITComponent extends AbstractServiceIU imp
 
     public ngOnInit(): void {
         this.myngOnInit();
+    }
+
+    private cargarDatosContratosDelTitular(): void {
+        // Ya hemos cargado en la regla de depdnencia los datos del titular
+        const varpusolicitud = this.getFirstInstanceFromCache(this.ptupuSolicitud);
+        // Ahora los utiilzamos para recuperar sus contratos
+        const tipoIdent = varpusolicitud.get('Titular.TipoIdentificacion.NombreCorto');
+        const numIdent = varpusolicitud.get('Titular.NumIdentificacion');
+        const numRadicado = varpusolicitud.get('NumRadicado');
+        
+        if (tipoIdent && numIdent) {
+            this.setShowWait(true);
+            this.bhServicesUtil.consultarContratosAsociadosDePersona(tipoIdent,numIdent,numRadicado).then( (contratos: any[]) => {
+                
+                if (contratos)  {
+                    const listaContratos: any[] = [];
+                    let textoMostrar = '';
+                    for (const contrato of contratos) {
+                        // Anyadimos el contrato a la lista y como texto concatenamos varios valores
+                        // Num. Contrato
+                        textoMostrar = BHServicesUtil.getValorElementoPorClave(contrato?.contract?.identifier, 'type', 'CONTRATO', 'value');
+                        // Fecha Inicio Vigencia
+                        const fecha = contrato?.contract?.applies?.start;
+                        textoMostrar += fecha ? ' ' + formatDate(fecha, 'dd/MM/yyyy', 'es-ES') : '';
+                        // Estado del contrato (descripción)
+                        const estado = contrato?.contract?.status;
+                        textoMostrar += estado ? ' ' + estado : '';
+                        // Codigo legal Producto
+                        const clProd = BHServicesUtil.getValorElementoPorClave(contrato.insurancePlan?.identifier, 'type', 'CODIGO_PRODUCTO', 'value');
+                        textoMostrar += clProd ? ' ' + clProd : '';
+                        // Codigo legal Plan
+                        const clPlan = BHServicesUtil.getValorElementoPorClave(contrato.contract?.identifier, 'type', 'PLAN', 'value');
+                        textoMostrar += clPlan ? ' ' + clPlan : '';
+                        // Num. Familia
+                        const numFam = BHServicesUtil.getValorElementoPorClave(contrato.contract?.identifier, 'type', 'FAMILIA', 'value');
+                        textoMostrar += numFam ? ' ' + numFam : '';
+
+                        listaContratos.push({key: contrato, value:textoMostrar});
+                    }
+                    this.ptNumContrato.options = listaContratos;
+                    if (listaContratos.length === 0) {
+                        this.util.addErrorMessage('El titular no tiene contratos asociados');    
+                    }
+                } else {
+                    this.util.addErrorMessage('El titular no tiene contratos asociados');
+                }
+                this.changeDetectorRef.markForCheck();
+                this.setShowWait(false);
+            }).catch( (err: Error) => {
+                this.setShowWait(false);
+                this.util.addErrorMessage(err);
+                this.changeDetectorRef.markForCheck();
+            });
+        } else {
+            this.util.addErrorMessage('Debe indicar primero el titular');
+            this.processCancel(false);
+        }
+
+        this.changeDetectorRef.markForCheck();
+    }    
+
+    public override saveChanges(): void {
+        if (this.ptNumContrato.value) {
+            // Llamamos al servicio utilizando los valores del contrato seleccionado
+            const globalSrv: GlobalServicesServices = new GlobalServicesServices(this.appGlobalInfo, this.util);
+
+            this.setShowWait(true);
+            globalSrv.tGSELECCONTRATOASOCTIT(this.ptupuSolicitud.getSingleValue(),
+                BHServicesUtil.getValorElementoPorClave(this.ptNumContrato.value?.contract?.identifier, 'type', 'CONTRATO', 'value'),
+                BHServicesUtil.getValorElementoPorClave(this.ptNumContrato.value?.insurancePlan?.identifier, 'type', 'CODIGO_PRODUCTO', 'value'),
+                BHServicesUtil.getValorElementoPorClave(this.ptNumContrato.value?.contract?.identifier, 'type', 'PLAN', 'value'),
+                BHServicesUtil.getValorElementoPorClave(this.ptNumContrato.value?.contract?.identifier, 'type', 'FAMILIA', 'value')).then( () => {
+                    this.setShowWait(false);
+                    this.processCancel();
+                }).catch( (err: ErrorInformation) => {
+                    this.setShowWait(false);
+                    this.util.addErrorMessage(err);
+                });
+        } else {
+            this.util.addErrorMessage('Debe seleccionar un contrato');
+        }
     }
 
     /**
@@ -85,7 +173,7 @@ export class GSSIUuTGSELECCONTRATOASOCTITComponent extends AbstractServiceIU imp
             'Contrato');
         this.ptNumContrato.mandatory = false;
         this.ptNumContrato.dataType = Field.dtString;
-        this.ptNumContrato.options = DefinedSelections.DS_GENERO;
+
         this.ptNumContrato.maxLength = 50;
         this.ptNumContrato.assignCSS();
         this.fields.push(this.ptNumContrato);
@@ -199,7 +287,7 @@ export class GSSIUuTGSELECCONTRATOASOCTITComponent extends AbstractServiceIU imp
     private executeDependecyRules1ptupuSolicitud(): void {
         this.cacheDependencyRules.counter++;
         this.addQueryInstanceFromField(this.ptupuSolicitud,
-                'Ae_solicitudes.id_solicitud');
+                'Ae_solicitudes.id_solicitud,Titular.TipoIdentificacion.NombreCorto,Titular.NumIdentificacion,NumRadicado');
         this.notifyCallToTheBackEnd();
         this.cacheDependencyRules.searchAll().then(() => {
             this.notifyAnswerFromToTheBackEnd();
@@ -227,6 +315,9 @@ export class GSSIUuTGSELECCONTRATOASOCTITComponent extends AbstractServiceIU imp
             this.ptCodLegalPlan.visible = false;
             // ptCodLegalProducto.SetVisible( false )
             this.ptCodLegalProducto.visible = false;
+
+            // Cargamos los datos de los contratos del titular de la solicitud
+            this.cargarDatosContratosDelTitular();            
         }
         this.executePendingDependencyRules();
         this.changeDetectorRef.markForCheck();

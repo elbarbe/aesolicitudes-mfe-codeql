@@ -56,6 +56,18 @@ export class InstanceCache {
         return returnValue;
     }
 
+    public quitarDeCache(attributeName: string): void {
+        if (this.attributes) {
+            const attLower = attributeName.toLowerCase().replace(new RegExp('[.]', 'g'), '-');
+            const index = this.attributes.findIndex( (att: AttributeCache) => {
+                return att.name === attLower;
+            });
+            if (index >= 0) {
+                this.attributes.splice(index, 1);
+            }
+        }
+    }
+
     /**
      * Return an array containing the names of missing attributes
      * @param attributes Required attributes

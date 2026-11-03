@@ -105,6 +105,13 @@ export class SolicitudSIUuTCREAROMODFIRMAComponent extends AbstractServiceIU imp
         this.ptupuatrLongitud.assignCSS();
         this.fields.push(this.ptupuatrLongitud);
 
+        navigator.geolocation.getCurrentPosition( (pos: any) => {
+            if (pos?.coords) {
+                this.ptupuatrLatitud.value = pos.coords.latitude;
+                this.ptupuatrLongitud.value = pos.coords.longitude;
+            }
+        });
+
         this.ptuTexto.nameInRequest = 'pt_texto';
         this.ptuTexto.alias = this.langMng.translateText(
             'cls_Solicitud_svc_TCREAROMODFIRMA_inArg_pt_Texto',
