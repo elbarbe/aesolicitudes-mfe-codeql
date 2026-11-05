@@ -131,7 +131,7 @@ export class SolicitudSIUuTINDICARCONTRATANTE2Component extends AbstractServiceI
 
     private buscarPersonaenCORE(): void {
 
-        // Si el usuario no puede ver los datos bÃ¡sicos de persona, no hacemos nada
+        // Si el usuario no puede ver los datos basicos de persona, no hacemos nada
         if (!this.appGlobalInfo.getLoggedUserInfo().puedeVerDatosPersona()) {
             return;
         }
